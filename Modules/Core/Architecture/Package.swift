@@ -18,5 +18,4 @@ let package = Package(
       name: "Architecture",
       dependencies: [
       ]),
-  ]
-)
+  ])
