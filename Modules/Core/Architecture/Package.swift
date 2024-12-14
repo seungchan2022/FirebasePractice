@@ -12,10 +12,18 @@ let package = Package(
       targets: ["Architecture"]),
   ],
   dependencies: [
+    .package(
+      url: "https://github.com/pointfreeco/swift-composable-architecture.git",
+      .upToNextMajor(from: "1.17.0")),
+    .package(
+      url: "https://github.com/forXifLess/LinkNavigator.git",
+      .upToNextMajor(from: "1.3.0")),
   ],
   targets: [
     .target(
       name: "Architecture",
       dependencies: [
+        .product(name: "LinkNavigator", package: "LinkNavigator"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
       ]),
   ])

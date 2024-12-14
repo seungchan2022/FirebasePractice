@@ -5,7 +5,7 @@ let targetList: [Target] = [
     name: "FirebasePractice",
     destinations: .iOS,
     product: .app,
-    productName: "Grab",
+    productName: "FirebasePractice",
     bundleId: "io.seungchan.firebasePractice",
     deploymentTargets: .iOS("18.0"),
     infoPlist: .extendingDefault(with: .compositeValue),
