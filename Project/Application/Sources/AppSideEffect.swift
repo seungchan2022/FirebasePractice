@@ -1,4 +1,3 @@
-import Architecture
 import Dashboard
 import Domain
 import Foundation
@@ -7,7 +6,7 @@ import Platform
 
 // MARK: - AppSideEffect
 
-struct AppSideEffect: DependencyType {
+struct AppSideEffect: DependencyType, DashboardSidEffect {
   let sampleUseCase: SampleUseCase
 }
 
