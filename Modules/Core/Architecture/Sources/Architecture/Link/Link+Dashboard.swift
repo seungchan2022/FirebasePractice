@@ -12,5 +12,7 @@ extension Link.Dashboard {
   public enum Path: String, Equatable {
     case sample
     case home
+    case signIn
+    case signUp
   }
 }

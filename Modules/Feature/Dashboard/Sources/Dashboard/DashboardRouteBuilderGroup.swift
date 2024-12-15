@@ -11,8 +11,9 @@ extension DashboardRouteBuilderGroup {
   @MainActor
   public func release() -> [RouteBuilderOf<RootNavigator>] {
     [
-      SampleRouteBuilder.generate(),
       HomeRouteBuilder.generate(),
+      SignInRouteBuilder.generate(),
+      SignUpRouteBuilder.generate(),
     ]
   }
 }

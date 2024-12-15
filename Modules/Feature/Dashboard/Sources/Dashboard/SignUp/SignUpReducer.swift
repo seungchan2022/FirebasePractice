@@ -3,11 +3,12 @@ import ComposableArchitecture
 import Domain
 import Foundation
 
-// MARK: - SampleReducer
+// MARK: - SignUpReducer
 
 @Reducer
-struct SampleReducer {
-  let sideEffect: SampleSideEffect
+struct SignUpReducer {
+
+  let sideEffect: SignUpSideEffect
 
   var body: some ReducerOf<Self> {
     BindingReducer()
@@ -18,10 +19,10 @@ struct SampleReducer {
 
       case .teardown:
         return .concatenate(
-          CanelID.allCases.map { .cancel(pageID: state.id, id: $0) })
+          CancelID.allCases.map { .cancel(pageID: state.id, id: $0) })
 
-      case .onTapNext:
-        sideEffect.routeToNext()
+      case .onTapBack:
+        sideEffect.routeToBack()
         return .none
 
       case .throwError(let error):
@@ -33,12 +34,13 @@ struct SampleReducer {
 
 }
 
-extension SampleReducer {
+extension SignUpReducer {
+
   @ObservableState
   struct State: Equatable, Identifiable, Sendable {
     let id: UUID
 
-    init(id: UUID = .init()) {
+    init(id: UUID = UUID()) {
       self.id = id
     }
   }
@@ -47,18 +49,16 @@ extension SampleReducer {
     case binding(BindingAction<State>)
     case teardown
 
-    case onTapNext
+    case onTapBack
 
     case throwError(CompositeErrorRepository)
-
   }
-
 }
 
-// MARK: SampleReducer.CanelID
+// MARK: SignUpReducer.CancelID
 
-extension SampleReducer {
-  enum CanelID: Equatable, CaseIterable {
+extension SignUpReducer {
+  enum CancelID: Equatable, CaseIterable {
     case teardown
   }
 }

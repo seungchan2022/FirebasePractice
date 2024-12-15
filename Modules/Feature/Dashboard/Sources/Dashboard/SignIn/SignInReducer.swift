@@ -3,11 +3,12 @@ import ComposableArchitecture
 import Domain
 import Foundation
 
-// MARK: - HomeReducer
+// MARK: - SignInReducer
 
 @Reducer
-struct HomeReducer {
-  let sideEffect: HomeSideEffect
+struct SignInReducer {
+
+  let sideEffect: SignInSideEffect
 
   var body: some ReducerOf<Self> {
     BindingReducer()
@@ -18,10 +19,10 @@ struct HomeReducer {
 
       case .teardown:
         return .concatenate(
-          CanelID.allCases.map { .cancel(pageID: state.id, id: $0) })
+          CancelID.allCases.map { .cancel(pageID: state.id, id: $0) })
 
-      case .onTapBack:
-        sideEffect.routeToBack()
+      case .onTapSignUp:
+        sideEffect.routeToSignUp()
         return .none
 
       case .throwError(let error):
@@ -33,12 +34,13 @@ struct HomeReducer {
 
 }
 
-extension HomeReducer {
+extension SignInReducer {
+
   @ObservableState
   struct State: Equatable, Identifiable, Sendable {
     let id: UUID
 
-    init(id: UUID = .init()) {
+    init(id: UUID = UUID()) {
       self.id = id
     }
   }
@@ -47,17 +49,16 @@ extension HomeReducer {
     case binding(BindingAction<State>)
     case teardown
 
-    case onTapBack
+    case onTapSignUp
 
     case throwError(CompositeErrorRepository)
   }
-
 }
 
-// MARK: HomeReducer.CanelID
+// MARK: SignInReducer.CancelID
 
-extension HomeReducer {
-  enum CanelID: Equatable, CaseIterable {
+extension SignInReducer {
+  enum CancelID: Equatable, CaseIterable {
     case teardown
   }
 }

@@ -14,7 +14,7 @@ extension AppMain: View {
   var body: some View {
     LinkNavigationView(
       linkNavigator: viewModel.linkNavigator,
-      item: .init(path: Link.Dashboard.Path.sample.rawValue, items: .none))
+      item: .init(path: Link.Dashboard.Path.signIn.rawValue, items: .none))
       .ignoresSafeArea()
   }
 }

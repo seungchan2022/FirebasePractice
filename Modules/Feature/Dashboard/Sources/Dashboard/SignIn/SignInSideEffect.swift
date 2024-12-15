@@ -1,22 +1,21 @@
 import Architecture
-import Domain
+import ComposableArchitecture
 import Foundation
 import LinkNavigator
 
-// MARK: - SampleSideEffect
+// MARK: - SignInSideEffect
 
-struct SampleSideEffect {
+struct SignInSideEffect {
   let useCaseGroup: DashboardSidEffect
   let navigator: RootNavigatorType
 }
 
-extension SampleSideEffect {
-
-  var routeToNext: () -> Void {
+extension SignInSideEffect {
+  var routeToSignUp: () -> Void {
     {
       navigator.next(
-        linkItem: LinkItem(
-          path: Link.Dashboard.Path.home.rawValue,
+        linkItem: .init(
+          path: Link.Dashboard.Path.signUp.rawValue,
           items: .none),
         isAnimated: true)
     }
