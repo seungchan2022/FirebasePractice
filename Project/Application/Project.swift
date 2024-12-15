@@ -67,6 +67,7 @@ extension [TargetDependency] {
       .package(product: "Platform", type: .runtime, condition: .none),
       .package(product: "Dashboard", type: .runtime, condition: .none),
       .package(product: "Functor", type: .runtime, condition: .none),
+      .package(product: "DesignSystem", type: .runtime, condition: .none),
     ]
   }
 }
@@ -79,6 +80,7 @@ extension [Package] {
       .local(path: .relativeToRoot("Modules/Core/Platform")),
       .local(path: .relativeToRoot("Modules/Feature/Dashboard")),
       .local(path: .relativeToRoot("Modules/Core/Functor")),
+      .local(path: .relativeToRoot("Modules/Core/DesignSystem")),
     ]
   }
 }

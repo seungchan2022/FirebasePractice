@@ -13,6 +13,7 @@ let package = Package(
   dependencies: [
     .package(path: "../../Core/Architecture"),
     .package(path: "../../Core/Domain"),
+    .package(path: "../../Core/DesignSystem"),
   ],
   targets: [
     .target(
@@ -20,5 +21,6 @@ let package = Package(
       dependencies: [
         "Architecture",
         "Domain",
+        "DesignSystem",
       ]),
   ])
