@@ -1,5 +1,6 @@
 import Architecture
 import ComposableArchitecture
+import Domain
 import Foundation
 
 // MARK: - SampleReducer
@@ -24,7 +25,7 @@ struct SampleReducer {
         return .none
 
       case .throwError(let error):
-        print(error)
+        sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
       }
     }
@@ -48,7 +49,7 @@ extension SampleReducer {
 
     case onTapNext
 
-    case throwError(String)
+    case throwError(CompositeErrorRepository)
 
   }
 

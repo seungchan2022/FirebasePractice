@@ -1,5 +1,6 @@
 import Architecture
 import ComposableArchitecture
+import Domain
 import Foundation
 
 // MARK: - HomeReducer
@@ -24,7 +25,8 @@ struct HomeReducer {
         return .none
 
       case .throwError(let error):
-        print(error)
+//        print(error)
+        sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
       }
     }
@@ -48,7 +50,7 @@ extension HomeReducer {
 
     case onTapBack
 
-    case throwError(String)
+    case throwError(CompositeErrorRepository)
   }
 
 }
