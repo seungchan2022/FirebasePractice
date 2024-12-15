@@ -2,17 +2,19 @@ import Architecture
 import LinkNavigator
 import SwiftUI
 
-@main
-struct AppMain: App {
+// MARK: - AppMain
 
-  @State private var appContainer = AppContainer()
+struct AppMain {
+  let viewModel: AppViewModel
+}
 
-  var body: some Scene {
-    WindowGroup {
-      LinkNavigationView(
-        linkNavigator: appContainer.linkNavigator,
-        item: .init(path: Link.Dashboard.Path.sample.rawValue, items: .none))
-        .ignoresSafeArea()
-    }
+// MARK: View
+
+extension AppMain: View {
+  var body: some View {
+    LinkNavigationView(
+      linkNavigator: viewModel.linkNavigator,
+      item: .init(path: Link.Dashboard.Path.sample.rawValue, items: .none))
+      .ignoresSafeArea()
   }
 }

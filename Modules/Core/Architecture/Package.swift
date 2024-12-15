@@ -18,6 +18,9 @@ let package = Package(
     .package(
       url: "https://github.com/forXifLess/LinkNavigator.git",
       .upToNextMajor(from: "1.3.0")),
+    .package(
+      url: "https://github.com/apple/swift-log.git",
+      .upToNextMajor(from: "1.5.3")),
   ],
   targets: [
     .target(
@@ -25,5 +28,6 @@ let package = Package(
       dependencies: [
         .product(name: "LinkNavigator", package: "LinkNavigator"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "Logging", package: "swift-log"),
       ]),
   ])

@@ -1,3 +1,4 @@
+import Architecture
 import Dashboard
 import Domain
 import Foundation
@@ -7,11 +8,14 @@ import Platform
 // MARK: - AppSideEffect
 
 struct AppSideEffect: DependencyType, DashboardSidEffect {
+  let toastViewModel: ToastViewActionType
   let sampleUseCase: SampleUseCase
 }
 
 extension AppSideEffect {
   static func generate() -> AppSideEffect {
-    .init(sampleUseCase: SampleUseCasePlatform())
+    .init(
+      toastViewModel: ToastViewModel(),
+      sampleUseCase: SampleUseCasePlatform())
   }
 }
