@@ -13,11 +13,16 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../../Core/Domain"),
+    .package(
+      url: "https://github.com/firebase/firebase-ios-sdk.git",
+      .upToNextMajor(from: "11.6.0")),
   ],
   targets: [
     .target(
       name: "Platform",
       dependencies: [
         "Domain",
+        .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
+        .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
       ]),
   ])

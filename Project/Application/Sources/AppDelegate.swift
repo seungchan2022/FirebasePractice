@@ -1,3 +1,4 @@
+import FirebaseCore
 import Foundation
 import LinkNavigator
 import UIKit
@@ -9,17 +10,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   var dependency: AppSideEffect { container.dependency }
   var navigator: SingleLinkNavigator { container.linkNavigayor }
 
-  func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    true
-  }
-
   func application(
     _: UIApplication,
-    open _: URL,
-    options _: [UIApplication.OpenURLOptionsKey: Any] = [:])
+    didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil)
     -> Bool
   {
-    false
+    FirebaseApp.configure()
+
+    return true
   }
 
   func application(

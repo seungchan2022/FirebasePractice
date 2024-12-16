@@ -1,5 +1,6 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
+
 let targetList: [Target] = [
   .target(
     name: "FirebasePractice",
