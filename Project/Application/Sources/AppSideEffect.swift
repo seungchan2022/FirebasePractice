@@ -9,13 +9,13 @@ import Platform
 
 struct AppSideEffect: DependencyType, DashboardSidEffect {
   let toastViewModel: ToastViewActionType
-  let sampleUseCase: SampleUseCase
+  let authUseCase: AuthUseCase
 }
 
 extension AppSideEffect {
   static func generate() -> AppSideEffect {
     .init(
       toastViewModel: ToastViewModel(),
-      sampleUseCase: SampleUseCasePlatform())
+      authUseCase: AuthUseCasePlatform())
   }
 }

@@ -1,5 +1,5 @@
 import Foundation
-import LinkNavigator
+@preconcurrency import LinkNavigator
 
 @MainActor
 final class AppContainer {

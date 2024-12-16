@@ -34,7 +34,7 @@ extension SignInPage: View {
           placeholder: "비밀번호",
           isSecure: true)
 
-        Button(action: { }) {
+        Button(action: { store.send(.onTapSignIn) }) {
           Text("로그인")
             .foregroundStyle(.white)
             .frame(height: 50)

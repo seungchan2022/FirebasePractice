@@ -13,13 +13,18 @@ extension HomePage: View {
   var body: some View {
     VStack(spacing: 40) {
       Spacer()
-      Text("Second Page")
+      Text(store.user.uid)
+      Text(store.user.email ?? "22")
+      Text(store.user.photoURL ?? "21")
 
-      Button(action: { store.send(.onTapBack) }) {
-        Text("Go To Back!")
+      Button(action: { store.send(.onTapSignOut) }) {
+        Text("로그아웃")
       }
 
       Spacer()
+    }
+    .onAppear {
+      store.send(.getUser)
     }
   }
 }

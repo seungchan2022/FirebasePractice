@@ -34,7 +34,7 @@ extension SignUpPage: View {
           placeholder: "비밀번호",
           isSecure: true)
 
-        Button(action: { }) {
+        Button(action: { store.send(.onTapSignUp) }) {
           Text("회원 가입")
             .foregroundStyle(.white)
             .frame(height: 50)
