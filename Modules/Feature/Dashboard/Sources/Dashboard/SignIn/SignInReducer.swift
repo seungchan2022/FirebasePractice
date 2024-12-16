@@ -40,6 +40,11 @@ extension SignInReducer {
   struct State: Equatable, Identifiable, Sendable {
     let id: UUID
 
+    var emailText = ""
+    var passwordText = ""
+
+    var isShowPassword = false
+
     init(id: UUID = UUID()) {
       self.id = id
     }
