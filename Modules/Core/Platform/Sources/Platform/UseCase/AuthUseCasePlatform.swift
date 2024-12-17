@@ -79,6 +79,13 @@ extension AuthUseCasePlatform: AuthUseCase {
 extension AuthUseCasePlatform {
   func createUser(email: String, password: String) async throws -> AuthEntity.Me.Response {
     let me = try await Auth.auth().createUser(withEmail: email, password: password)
+
+    let userName = email.components(separatedBy: "@").first ?? ""
+
+    let changeRequest = me.user.createProfileChangeRequest()
+    changeRequest.displayName = userName
+    try await changeRequest.commitChanges()
+
     return me.user.serialized()
   }
 
@@ -115,6 +122,7 @@ extension FirebaseAuth.User {
     .init(
       uid: uid,
       email: email,
+      userName: displayName,
       photoURL: photoURL?.absoluteString)
   }
 }

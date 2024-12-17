@@ -138,7 +138,7 @@ extension HomeReducer {
 
     let id: UUID
 
-    var user: AuthEntity.Me.Response = .init(uid: "", email: "", photoURL: "")
+    var user: AuthEntity.Me.Response = .init(uid: "", email: "", userName: "", photoURL: "")
 
     var isShowUpdatePassword = false
     var isShowCurrPassword = false

@@ -33,6 +33,7 @@ struct SignUpReducer {
         case .success(let status):
           switch status {
           case true:
+            sideEffect.routeToBack()
             sideEffect.useCaseGroup.toastViewModel.send(message: "회원가입 성공")
 
           case false:
