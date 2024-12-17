@@ -1,27 +1,44 @@
 import SwiftUI
 
-// MARK: - SignUpPage.TextFieldComponent
+// MARK: - CustomTextField
 
-extension SignUpPage {
-  struct TextFieldComponent {
-    let viewState: ViewState
+public struct CustomTextField {
 
-    @Binding var text: String
-    @Binding var isShowText: Bool
-    @FocusState private var isActive
+  // MARK: Lifecycle
 
-    let placeholder: String
-    let isSecure: Bool
-
+  public init(
+    placeholder: String,
+    errorMessage: String? = nil,
+    isSecure: Bool,
+    text: Binding<String>,
+    isShowText: Binding<Bool>)
+  {
+    self.placeholder = placeholder
+    self.errorMessage = errorMessage
+    self.isSecure = isSecure
+    _text = text
+    _isShowText = isShowText
   }
+
+  // MARK: Internal
+
+  let placeholder: String
+  let errorMessage: String?
+  let isSecure: Bool
+
+  @Binding var text: String
+  @Binding var isShowText: Bool
+
+  // MARK: Private
+
+  @FocusState private var isActive
+
 }
 
-extension SignUpPage.TextFieldComponent { }
+// MARK: View
 
-// MARK: - SignUpPage.TextFieldComponent + View
-
-extension SignUpPage.TextFieldComponent: View {
-  var body: some View {
+extension CustomTextField: View {
+  public var body: some View {
     VStack(alignment: .leading) {
       ZStack(alignment: .leading) {
         if isSecure, !isShowText {
@@ -62,12 +79,13 @@ extension SignUpPage.TextFieldComponent: View {
           }
         }
       }
+
+      if let errorMessage {
+        Text(errorMessage)
+          .font(.footnote)
+          .foregroundColor(.red)
+          .padding(.leading)
+      }
     }
   }
-}
-
-// MARK: - SignUpPage.TextFieldComponent.ViewState
-
-extension SignUpPage.TextFieldComponent {
-  struct ViewState: Equatable { }
 }

@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import DesignSystem
 import SwiftUI
 
 // MARK: - SignUpPage
@@ -20,19 +21,19 @@ extension SignUpPage: View {
   var body: some View {
     ScrollView {
       VStack(spacing: 40) {
-        TextFieldComponent(
-          viewState: .init(),
-          text: $store.emailText,
-          isShowText: .constant(false),
+        CustomTextField(
           placeholder: "이메일",
-          isSecure: false)
+          errorMessage: .none,
+          isSecure: false,
+          text: $store.emailText,
+          isShowText: .constant(false))
 
-        TextFieldComponent(
-          viewState: .init(),
-          text: $store.passwordText,
-          isShowText: $store.isShowPassword,
+        CustomTextField(
           placeholder: "비밀번호",
-          isSecure: true)
+          errorMessage: .none,
+          isSecure: true,
+          text: $store.passwordText,
+          isShowText: $store.isShowPassword)
 
         Button(action: { store.send(.onTapSignUp) }) {
           Text("회원 가입")

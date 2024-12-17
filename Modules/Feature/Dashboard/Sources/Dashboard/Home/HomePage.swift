@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import DesignSystem
 import SwiftUI
 
 // MARK: - HomePage
@@ -33,21 +34,19 @@ extension HomePage: View {
     }
     .sheet(isPresented: $store.isShowUpdatePassword) {
       VStack(spacing: 48) {
-        TextFieldComponent(
-          viewState: .init(),
-          text: $store.currPasswordText,
-          isShowText: $store.isShowCurrPassword,
+        CustomTextField(
           placeholder: "현재 비밀번호",
           errorMessage: .none,
-          isSecure: true)
+          isSecure: true,
+          text: $store.currPasswordText,
+          isShowText: $store.isShowCurrPassword)
 
-        TextFieldComponent(
-          viewState: .init(),
-          text: $store.newPasswordText,
-          isShowText: $store.isShowNewPassword,
+        CustomTextField(
           placeholder: "변경할 비밀번호",
           errorMessage: .none,
-          isSecure: true)
+          isSecure: true,
+          text: $store.newPasswordText,
+          isShowText: $store.isShowNewPassword)
 
         Button(action: { store.send(.onTapUpdatePassword) }) {
           Text("비밀번호 변경")
