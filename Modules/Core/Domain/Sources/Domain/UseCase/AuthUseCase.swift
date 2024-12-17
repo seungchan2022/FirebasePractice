@@ -9,4 +9,6 @@ public protocol AuthUseCase: Sendable {
   var signOut: () throws -> Bool { get }
 
   var updatePassword: (String, String) async throws -> Bool { get }
+
+  var deleteUser: (String) async throws -> Bool { get }
 }

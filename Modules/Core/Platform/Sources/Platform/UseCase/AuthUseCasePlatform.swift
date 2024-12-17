@@ -64,6 +64,16 @@ extension AuthUseCasePlatform: AuthUseCase {
     }
   }
 
+  public var deleteUser: (String) async throws -> Bool {
+    { currPassword in
+      do {
+        let _ = try await deleteUser(password: currPassword)
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension AuthUseCasePlatform {
@@ -88,6 +98,15 @@ extension AuthUseCasePlatform {
 
     try await me.reauthenticate(with: credential)
     try await me.updatePassword(to: newPassword)
+  }
+
+  func deleteUser(password: String) async throws {
+    guard let me = Auth.auth().currentUser else { return }
+
+    let credential = EmailAuthProvider.credential(withEmail: me.email ?? "", password: password)
+
+    try await me.reauthenticate(with: credential)
+    try await me.delete()
   }
 }
 

@@ -24,12 +24,21 @@ extension HomePage: View {
         Button(action: { store.isShowUpdatePassword = true }) {
           Text("비밀번호 변경")
         }
-      } header: {
-        Text("유저 정보 변경")
       }
 
-      Button(action: { store.send(.onTapSignOut) }) {
-        Text("로그아웃")
+      Section {
+        Button(action: { store.send(.onTapSignOut) }) {
+          Text("로그아웃")
+        }
+      }
+
+      Section {
+        Button(role: .destructive, action: {
+          store.isShowDeleteUserAlert = true
+          store.passwordText = ""
+        }) {
+          Text("계정 탈퇴")
+        }
       }
     }
     .sheet(isPresented: $store.isShowUpdatePassword) {
@@ -59,6 +68,24 @@ extension HomePage: View {
       }
       .padding(16)
       .presentationDetents([.fraction(0.45)])
+    }
+    .alert(
+      "계정을 탈퇴하시겟습니까?",
+      isPresented: $store.isShowDeleteUserAlert)
+    {
+      SecureField("비밀번호", text: $store.passwordText)
+        .autocorrectionDisabled(true)
+        .textInputAutocapitalization(.never)
+
+      Button(role: .destructive, action: { store.send(.onTapDeleteUser) }) {
+        Text("확인")
+      }
+
+      Button(role: .cancel, action: { store.isShowDeleteUserAlert = false }) {
+        Text("취소")
+      }
+    } message: {
+      Text("계정을 탈퇴 하려면 현재 비밀번호를 입력하고, 확인 버튼을 눌러주세요.")
     }
     .onAppear {
       store.send(.getUser)

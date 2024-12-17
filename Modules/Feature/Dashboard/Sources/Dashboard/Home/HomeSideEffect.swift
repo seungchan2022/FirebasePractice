@@ -51,7 +51,20 @@ extension HomeSideEffect {
     }
   }
 
-  var routeSignIn: () -> Void {
+  var deleteUser: (String) -> Effect<HomeReducer.Action> {
+    { currPassword in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.deleteUser(currPassword)
+          await send(HomeReducer.Action.fetchDeleteUser(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchDeleteUser(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var routeToSignIn: () -> Void {
     {
       navigator.replace(
         linkItem: .init(

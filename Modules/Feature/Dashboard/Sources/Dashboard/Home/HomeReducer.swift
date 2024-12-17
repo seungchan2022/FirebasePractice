@@ -49,7 +49,7 @@ struct HomeReducer {
         case .success(let status):
           switch status {
           case true:
-            sideEffect.routeSignIn()
+            sideEffect.routeToSignIn()
             sideEffect.useCaseGroup.toastViewModel.send(message: "로그아웃 성공")
 
           case false:
@@ -91,6 +91,30 @@ struct HomeReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapDeleteUser:
+        state.fetchDeleteUser.isLoading = true
+        return sideEffect
+          .deleteUser(state.passwordText)
+          .cancellable(pageID: state.id, id: CancelID.requestDeleteUser, cancelInFlight: true)
+
+      case .fetchDeleteUser(let result):
+        state.fetchDeleteUser.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.useCaseGroup.toastViewModel.send(message: "계정이 탈퇴되었습니다!")
+            sideEffect.routeToSignIn()
+
+          case false:
+            sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "게정 탈퇴중 오류가 발생했습니다.")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -103,25 +127,34 @@ struct HomeReducer {
 extension HomeReducer {
   @ObservableState
   struct State: Equatable, Identifiable, Sendable {
+
+    // MARK: Lifecycle
+
+    init(id: UUID = .init()) {
+      self.id = id
+    }
+
+    // MARK: Internal
+
     let id: UUID
 
     var user: AuthEntity.Me.Response = .init(uid: "", email: "", photoURL: "")
 
     var isShowUpdatePassword = false
-
     var isShowCurrPassword = false
     var isShowNewPassword = false
+    var isShowDeleteUserAlert = false
 
     var currPasswordText = ""
     var newPasswordText = ""
+    var passwordText = ""
 
     var fetchUser: FetchState.Data<AuthEntity.Me.Response?> = .init(isLoading: false, value: .none)
     var fetchSignOut: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchUpdatePassword: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
-    init(id: UUID = .init()) {
-      self.id = id
-    }
+    var fetchDeleteUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -135,8 +168,10 @@ extension HomeReducer {
     case fetchSignOut(Result<Bool, CompositeErrorRepository>)
 
     case onTapUpdatePassword
-
     case fetchUpdatePassword(Result<Bool, CompositeErrorRepository>)
+
+    case onTapDeleteUser
+    case fetchDeleteUser(Result<Bool, CompositeErrorRepository>)
 
     case throwError(CompositeErrorRepository)
   }
@@ -151,5 +186,6 @@ extension HomeReducer {
     case requestUser
     case requestSignOut
     case requestUpdatePassword
+    case requestDeleteUser
   }
 }
