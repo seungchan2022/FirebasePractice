@@ -144,6 +144,7 @@ extension HomeReducer {
     var isShowCurrPassword = false
     var isShowNewPassword = false
     var isShowDeleteUserAlert = false
+    var isShowSignOutAlert = false
 
     var currPasswordText = ""
     var newPasswordText = ""

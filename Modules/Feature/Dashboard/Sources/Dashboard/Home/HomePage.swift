@@ -27,7 +27,7 @@ extension HomePage: View {
       }
 
       Section {
-        Button(action: { store.send(.onTapSignOut) }) {
+        Button(action: { store.isShowSignOutAlert = true }) {
           Text("로그아웃")
         }
       }
@@ -68,6 +68,20 @@ extension HomePage: View {
       }
       .padding(16)
       .presentationDetents([.fraction(0.45)])
+    }
+    .alert(
+      "로그아웃을 하시겠습니까?",
+      isPresented: $store.isShowSignOutAlert)
+    {
+      Button(role: .destructive ,action: { store.send(.onTapSignOut) }) {
+        Text("확인")
+      }
+
+      Button(role: .cancel, action: { store.isShowSignOutAlert = false }) {
+        Text("취소")
+      }
+    } message: {
+      Text("로그아웃을 하려면 확인 버튼을 눌러주세요.")
     }
     .alert(
       "계정을 탈퇴하시겟습니까?",
