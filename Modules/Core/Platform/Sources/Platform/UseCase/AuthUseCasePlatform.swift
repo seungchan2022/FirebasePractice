@@ -19,7 +19,7 @@ extension AuthUseCasePlatform: AuthUseCase {
         let _ = try await createUser(email: req.email, password: req.password)
         return true
       } catch {
-        throw error
+        throw CompositeErrorRepository.other(error)
       }
     }
   }
@@ -30,7 +30,7 @@ extension AuthUseCasePlatform: AuthUseCase {
         let _ = try await loginUser(email: req.email, password: req.password)
         return true
       } catch {
-        throw error
+        throw CompositeErrorRepository.other(error)
       }
     }
   }
@@ -48,10 +48,22 @@ extension AuthUseCasePlatform: AuthUseCase {
         let _ = try logOut()
         return true
       } catch {
-        throw error
+        throw CompositeErrorRepository.other(error)
       }
     }
   }
+
+  public var updatePassword: (String, String) async throws -> Bool {
+    { currPassword, newPassword in
+      do {
+        let _ = try await updatePassword(currPassword: currPassword, newPassword: newPassword)
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
 }
 
 extension AuthUseCasePlatform {
@@ -67,6 +79,15 @@ extension AuthUseCasePlatform {
 
   func logOut() throws {
     try Auth.auth().signOut()
+  }
+
+  func updatePassword(currPassword: String, newPassword: String) async throws {
+    guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+    let credential = EmailAuthProvider.credential(withEmail: me.email ?? "", password: currPassword)
+
+    try await me.reauthenticate(with: credential)
+    try await me.updatePassword(to: newPassword)
   }
 }
 

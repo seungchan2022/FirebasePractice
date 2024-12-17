@@ -38,6 +38,19 @@ extension HomeSideEffect {
     }
   }
 
+  var updatePassword: (String, String) -> Effect<HomeReducer.Action> {
+    { currPassword, newPassword in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.updatePassword(currPassword, newPassword)
+          await send(HomeReducer.Action.fetchUpdatePassword(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchUpdatePassword(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeSignIn: () -> Void {
     {
       navigator.replace(

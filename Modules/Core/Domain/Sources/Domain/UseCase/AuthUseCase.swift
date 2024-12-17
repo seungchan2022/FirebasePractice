@@ -7,4 +7,6 @@ public protocol AuthUseCase: Sendable {
   var me: () throws -> AuthEntity.Me.Response { get }
 
   var signOut: () throws -> Bool { get }
+
+  var updatePassword: (String, String) async throws -> Bool { get }
 }

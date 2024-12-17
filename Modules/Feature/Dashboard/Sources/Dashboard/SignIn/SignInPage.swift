@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import DesignSystem
 import SwiftUI
 
 // MARK: - SignInPage
@@ -73,5 +74,8 @@ extension SignInPage: View {
       .padding(.horizontal, 16)
     }
     .onAppear { }
+    .onDisappear {
+      store.send(.teardown)
+    }
   }
 }

@@ -49,5 +49,8 @@ extension SignUpPage: View {
       .padding(.horizontal, 16)
     }
     .onAppear { }
+    .onDisappear {
+      store.send(.teardown)
+    }
   }
 }
