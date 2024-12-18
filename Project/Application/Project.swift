@@ -56,6 +56,14 @@ extension [String: Plist.Value] {
       "CFBundleInfoDictionaryVersion": "6.0",
       "CFBundleVersion": .string(.appBuildVersion()),
       "UILaunchScreen": .dictionary([:]),
+      "GIDClientID": .string("${CLIENT_ID}"),
+      "REVERSED_CLIENT_ID": .string("${REVERSED_CLIENT_ID}"),
+      "CFBundleURLTypes": .array([
+        .dictionary([
+          "CFBundleTypeRole": .string("Editor"),
+          "CFBundleURLSchemes": .string("${REVERSED_CLIENT_ID}"),
+        ]),
+      ]),
     ]
   }
 }

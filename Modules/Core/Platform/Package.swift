@@ -16,6 +16,9 @@ let package = Package(
     .package(
       url: "https://github.com/firebase/firebase-ios-sdk.git",
       .upToNextMajor(from: "11.6.0")),
+      .package(
+        url: "https://github.com/google/GoogleSignIn-iOS",
+        .upToNextMajor(from: "8.0.0")),
   ],
   targets: [
     .target(
@@ -24,5 +27,7 @@ let package = Package(
         "Domain",
         .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
         .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
+        .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
+        .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS"),
       ]),
   ])

@@ -3,3 +3,5 @@
 import Domain
 import FirebaseAuth
 import FirebaseCore
+import GoogleSignIn
+import GoogleSignInSwift
