@@ -93,3 +93,4 @@ SourcePackages
 
 ### Private ENV
 ENV.json
+GoogleService-Info.plist
