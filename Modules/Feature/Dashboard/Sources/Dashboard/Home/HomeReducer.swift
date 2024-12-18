@@ -80,7 +80,7 @@ struct HomeReducer {
           switch status {
           case true:
             state.isShowUpdatePassword = false
-            sideEffect.useCaseGroup.toastViewModel.send(message: "비밀번호 변경이 완료되었습니다.")
+            sideEffect.useCaseGroup.toastViewModel.send(message: "비밀번호 변경이 완료되었습니다. 변경된 비밀번호로 로그인 해주세요.")
 
           case false:
             sideEffect.useCaseGroup.toastViewModel.send(message: "비밀번호 변경도중 에러가 발생했습니다.")

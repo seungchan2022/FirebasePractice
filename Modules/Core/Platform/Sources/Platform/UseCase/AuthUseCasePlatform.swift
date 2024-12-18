@@ -74,6 +74,17 @@ extension AuthUseCasePlatform: AuthUseCase {
       }
     }
   }
+
+  public var resetPassword: (String) async throws -> Bool {
+    { email in
+      do {
+        let _ = try await sendPasswordReset(email: email)
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension AuthUseCasePlatform {
@@ -114,6 +125,12 @@ extension AuthUseCasePlatform {
 
     try await me.reauthenticate(with: credential)
     try await me.delete()
+  }
+
+  func sendPasswordReset(email: String) async throws {
+    Auth.auth().languageCode = "ko"
+
+    try await Auth.auth().sendPasswordReset(withEmail: email)
   }
 }
 

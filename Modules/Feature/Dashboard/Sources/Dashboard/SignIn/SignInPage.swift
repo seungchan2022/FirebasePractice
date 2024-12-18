@@ -48,7 +48,10 @@ extension SignInPage: View {
 
         HStack {
           Spacer()
-          Button(action: { }) {
+          Button(action: {
+            store.resetEmailText = ""
+            store.isShowResetPassword = true
+          }) {
             Text("비밀번호 재설정")
           }
 
@@ -72,6 +75,13 @@ extension SignInPage: View {
       }
       .padding(.top, 36)
       .padding(.horizontal, 16)
+    }
+    .sheet(isPresented: $store.isShowResetPassword) {
+      ResetPasswordComponent(
+        viewState: .init(),
+        resetEmail: $store.resetEmailText,
+        tapAction: { store.send(.onTapResetPassword) })
+        .presentationDetents([.fraction(0.4)])
     }
     .onAppear { }
     .onDisappear {

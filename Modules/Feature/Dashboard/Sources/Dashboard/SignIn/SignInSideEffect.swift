@@ -26,6 +26,19 @@ extension SignInSideEffect {
     }
   }
 
+  var resetPassword: (String) -> Effect<SignInReducer.Action> {
+    { email in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.resetPassword(email)
+          await send(SignInReducer.Action.fetchResetPassword(.success(response)))
+        } catch {
+          await send(SignInReducer.Action.fetchResetPassword(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToSignUp: () -> Void {
     {
       navigator.next(
