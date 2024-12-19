@@ -16,4 +16,6 @@ public protocol AuthUseCase: Sendable {
 
   var resetPassword: (String) async throws -> Bool { get }
 
+  var getProvider: () throws -> [AuthEntity.ProviderOption.Option] { get }
+
 }

@@ -21,9 +21,11 @@ extension HomePage: View {
         Text("프로필")
       }
 
-      Section {
-        Button(action: { store.isShowUpdatePassword = true }) {
-          Text("비밀번호 변경")
+      if store.providerList.contains(.email) {
+        Section {
+          Button(action: { store.isShowUpdatePassword = true }) {
+            Text("비밀번호 변경")
+          }
         }
       }
 
@@ -104,6 +106,7 @@ extension HomePage: View {
     }
     .onAppear {
       store.send(.getUser)
+      store.send(.getProvider)
     }
     .onDisappear {
       store.send(.teardown)

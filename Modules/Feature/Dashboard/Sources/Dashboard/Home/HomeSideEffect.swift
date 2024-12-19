@@ -64,6 +64,19 @@ extension HomeSideEffect {
     }
   }
 
+  var getProvider: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let response = try useCaseGroup.authUseCase.getProvider()
+          await send(HomeReducer.Action.fetchProvider(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchProvider(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToSignIn: () -> Void {
     {
       navigator.replace(

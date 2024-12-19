@@ -115,6 +115,24 @@ struct HomeReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .getProvider:
+        state.fetchProvider.isLoading = true
+        return sideEffect
+          .getProvider()
+          .cancellable(pageID: state.id, id: CancelID.requestGetProvider, cancelInFlight: true)
+
+      case .fetchProvider(let result):
+        state.fetchProvider.isLoading = false
+        switch result {
+        case .success(let itemList):
+          state.fetchProvider.value = itemList
+          state.providerList = state.providerList + itemList
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -139,6 +157,9 @@ extension HomeReducer {
     let id: UUID
 
     var user: AuthEntity.Me.Response = .init(uid: "", email: "", userName: "", photoURL: "")
+
+    var providerList: [AuthEntity.ProviderOption.Option] = []
+    var fetchProvider: FetchState.Data<[AuthEntity.ProviderOption.Option]?> = .init(isLoading: false, value: .none)
 
     var isShowUpdatePassword = false
     var isShowCurrPassword = false
@@ -174,6 +195,9 @@ extension HomeReducer {
     case onTapDeleteUser
     case fetchDeleteUser(Result<Bool, CompositeErrorRepository>)
 
+    case getProvider
+    case fetchProvider(Result<[AuthEntity.ProviderOption.Option], CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 
@@ -188,5 +212,6 @@ extension HomeReducer {
     case requestSignOut
     case requestUpdatePassword
     case requestDeleteUser
+    case requestGetProvider
   }
 }

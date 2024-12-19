@@ -100,6 +100,23 @@ extension AuthUseCasePlatform: AuthUseCase {
       }
     }
   }
+
+  public var getProvider: () throws -> [AuthEntity.ProviderOption.Option] {
+    {
+      guard let providerData = Auth.auth().currentUser?.providerData else { throw CompositeErrorRepository.invalidTypeCasting }
+
+      var itemList: [AuthEntity.ProviderOption.Option] = []
+      for provider in providerData {
+        if let option = AuthEntity.ProviderOption.Option(rawValue: provider.providerID) {
+          itemList = itemList + [option]
+        } else {
+          assertionFailure("Provider option not found: \(provider.providerID)")
+        }
+      }
+
+      return itemList
+    }
+  }
 }
 
 extension AuthUseCasePlatform {
