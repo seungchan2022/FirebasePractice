@@ -1,5 +1,7 @@
 import ComposableArchitecture
 import DesignSystem
+import GoogleSignIn
+import GoogleSignInSwift
 import SwiftUI
 
 // MARK: - SignInPage
@@ -72,6 +74,10 @@ extension SignInPage: View {
           Spacer()
         }
         .padding(.top, 8)
+
+        GoogleSignInButton(
+          viewModel: .init(scheme: .dark, style: .wide, state: .normal),
+          action: { store.send(.onTapSignInGoogle) })
       }
       .padding(.top, 36)
       .padding(.horizontal, 16)

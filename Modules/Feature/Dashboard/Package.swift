@@ -14,6 +14,7 @@ let package = Package(
     .package(path: "../../Core/Architecture"),
     .package(path: "../../Core/Domain"),
     .package(path: "../../Core/DesignSystem"),
+    .package(path: "../../Core/Platform"),
   ],
   targets: [
     .target(
@@ -22,5 +23,6 @@ let package = Package(
         "Architecture",
         "Domain",
         "DesignSystem",
+        "Platform",
       ]),
   ])

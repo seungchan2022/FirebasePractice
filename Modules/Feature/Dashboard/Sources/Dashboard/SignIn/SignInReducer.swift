@@ -73,6 +73,30 @@ struct SignInReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapSignInGoogle:
+        state.fetchSignInGoogle.isLoading = true
+        return sideEffect
+          .googleSignIn()
+          .cancellable(pageID: state.id, id: CancelID.requestGoogleSignIn, cancelInFlight: true)
+
+      case .fetchSignInGoogle(let result):
+        state.fetchSignInGoogle.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.routeToHome()
+            sideEffect.useCaseGroup.toastViewModel.send(message: "구글 로그인 성공")
+
+          case false:
+            sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "구글 로그인 실패")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -86,6 +110,15 @@ extension SignInReducer {
 
   @ObservableState
   struct State: Equatable, Identifiable, Sendable {
+
+    // MARK: Lifecycle
+
+    init(id: UUID = UUID()) {
+      self.id = id
+    }
+
+    // MARK: Internal
+
     let id: UUID
 
     var emailText = ""
@@ -101,9 +134,8 @@ extension SignInReducer {
 
     var fetchResetPassword: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
-    init(id: UUID = UUID()) {
-      self.id = id
-    }
+    var fetchSignInGoogle: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -118,6 +150,9 @@ extension SignInReducer {
     case onTapResetPassword
     case fetchResetPassword(Result<Bool, CompositeErrorRepository>)
 
+    case onTapSignInGoogle
+    case fetchSignInGoogle(Result<Bool, CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 }
@@ -129,5 +164,6 @@ extension SignInReducer {
     case teardown
     case requestSignIn
     case requestResetPassword
+    case requestGoogleSignIn
   }
 }

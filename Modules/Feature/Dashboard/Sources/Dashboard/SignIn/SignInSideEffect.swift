@@ -39,6 +39,19 @@ extension SignInSideEffect {
     }
   }
 
+  var googleSignIn: () -> Effect<SignInReducer.Action> {
+    {
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.signInGoogle()
+          await send(SignInReducer.Action.fetchSignInGoogle(.success(response)))
+        } catch {
+          await send(SignInReducer.Action.fetchSignInGoogle(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToSignUp: () -> Void {
     {
       navigator.next(

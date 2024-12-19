@@ -61,7 +61,9 @@ extension [String: Plist.Value] {
       "CFBundleURLTypes": .array([
         .dictionary([
           "CFBundleTypeRole": .string("Editor"),
-          "CFBundleURLSchemes": .string("${REVERSED_CLIENT_ID}"),
+          "CFBundleURLSchemes": .array([
+            .string("${REVERSED_CLIENT_ID}"),
+          ]),
         ]),
       ]),
     ]

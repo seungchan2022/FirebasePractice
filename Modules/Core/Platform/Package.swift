@@ -16,9 +16,9 @@ let package = Package(
     .package(
       url: "https://github.com/firebase/firebase-ios-sdk.git",
       .upToNextMajor(from: "11.6.0")),
-      .package(
-        url: "https://github.com/google/GoogleSignIn-iOS",
-        .upToNextMajor(from: "8.0.0")),
+    .package(
+      url: "https://github.com/google/GoogleSignIn-iOS",
+      .upToNextMajor(from: "8.0.0")),
   ],
   targets: [
     .target(
