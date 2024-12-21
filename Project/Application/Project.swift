@@ -7,7 +7,7 @@ let targetList: [Target] = [
     destinations: .iOS,
     product: .app,
     productName: "FirebasePractice",
-    bundleId: "io.seungchan.firebasePractice",
+    bundleId: "io.seungchan.firebasePracticeDemo",
     deploymentTargets: .iOS("18.0"),
     infoPlist: .extendingDefault(with: .compositeValue),
     sources: ["Sources/**"],
