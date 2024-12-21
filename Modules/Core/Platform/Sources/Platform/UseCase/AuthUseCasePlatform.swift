@@ -50,6 +50,19 @@ extension AuthUseCasePlatform: AuthUseCase {
     }
   }
 
+  public var signInApple: () async throws -> Bool {
+    {
+      do {
+        let helper = await AppleAuthHelper()
+        let tokens = try await helper.startSignInWithAppleFlow()
+        try await signInWithApple(tokens: tokens)
+        return true
+      } catch  {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
   public var me: () throws -> AuthEntity.Me.Response {
     {
       guard let user = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
@@ -209,6 +222,12 @@ extension AuthUseCasePlatform {
     return try await signInCredential(credential: credential)
   }
 
+  @discardableResult
+  func signInWithApple(tokens: AuthEntity.Apple.Response) async throws -> AuthEntity.Me.Response {
+    let credential = OAuthProvider.appleCredential(withIDToken: tokens.token, rawNonce: tokens.nonce, fullName: .init(givenName: tokens.name))
+    return try await signInCredential(credential: credential)
+  }
+
   /// SSO관련 로그인들은 credential로 로그인들 하기 때문에, credential에 관한것을 구현하고 가져다 사용
   /// 만약 구글이면 구글 로그인 관련한 곳에 가져가 쓰고, 애플이면 애플 로그인하는 곳에 가져다씀
   func signInCredential(credential: AuthCredential) async throws -> AuthEntity.Me.Response {
@@ -216,6 +235,7 @@ extension AuthUseCasePlatform {
     return me.user.serialized()
   }
 }
+
 
 extension FirebaseAuth.User {
   fileprivate func serialized() -> AuthEntity.Me.Response {

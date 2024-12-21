@@ -78,6 +78,12 @@ extension SignInPage: View {
         GoogleSignInButton(
           viewModel: .init(scheme: .dark, style: .wide, state: .normal),
           action: { store.send(.onTapSignInGoogle) })
+
+        Button(action: { store.send(.onTapSignInApple) }) {
+          AppleButtonComponent(
+            viewState: .init(type: .default, style: .black))
+          .frame(height: 50)
+        }
       }
       .padding(.top, 36)
       .padding(.horizontal, 16)

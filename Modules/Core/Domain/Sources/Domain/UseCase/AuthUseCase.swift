@@ -6,6 +6,8 @@ public protocol AuthUseCase: Sendable {
 
   var signInGoogle: () async throws -> Bool { get }
 
+  var signInApple: () async throws -> Bool { get }
+
   var me: () throws -> AuthEntity.Me.Response { get }
 
   var signOut: () throws -> Bool { get }

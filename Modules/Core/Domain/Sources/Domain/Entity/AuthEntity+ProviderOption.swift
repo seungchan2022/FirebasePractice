@@ -12,5 +12,6 @@ extension AuthEntity.ProviderOption {
   public enum Option: String, Equatable, Sendable {
     case email = "password"
     case google = "google.com"
+    case apple = "apple.com"
   }
 }

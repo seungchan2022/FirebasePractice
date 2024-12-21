@@ -97,6 +97,29 @@ struct SignInReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapSignInApple:
+        state.fetchSignInApple.isLoading = false
+        return sideEffect
+          .appleSignIn()
+          .cancellable(pageID: state.id, id: CancelID.requestAppleSignIn, cancelInFlight: true)
+
+      case .fetchSignInApple(let result):
+        state.fetchSignInApple.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.routeToHome()
+            sideEffect.useCaseGroup.toastViewModel.send(message: "애플 로그인 성공")
+          case false:
+            sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "애플 로그인 실패")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -136,6 +159,7 @@ extension SignInReducer {
 
     var fetchSignInGoogle: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
+    var fetchSignInApple: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -153,6 +177,9 @@ extension SignInReducer {
     case onTapSignInGoogle
     case fetchSignInGoogle(Result<Bool, CompositeErrorRepository>)
 
+    case onTapSignInApple
+    case fetchSignInApple(Result<Bool, CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 }
@@ -165,5 +192,6 @@ extension SignInReducer {
     case requestSignIn
     case requestResetPassword
     case requestGoogleSignIn
+    case requestAppleSignIn
   }
 }
