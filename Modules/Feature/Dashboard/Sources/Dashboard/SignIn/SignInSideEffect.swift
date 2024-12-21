@@ -55,7 +55,7 @@ extension SignInSideEffect {
   var appleSignIn: () -> Effect<SignInReducer.Action> {
     {
       .run { send in
-        do  {
+        do {
           let response = try await useCaseGroup.authUseCase.signInApple()
           await send(SignInReducer.Action.fetchSignInApple(.success(response)))
         } catch {

@@ -57,7 +57,7 @@ extension AuthUseCasePlatform: AuthUseCase {
         let tokens = try await helper.startSignInWithAppleFlow()
         try await signInWithApple(tokens: tokens)
         return true
-      } catch  {
+      } catch {
         throw CompositeErrorRepository.other(error)
       }
     }
@@ -224,7 +224,10 @@ extension AuthUseCasePlatform {
 
   @discardableResult
   func signInWithApple(tokens: AuthEntity.Apple.Response) async throws -> AuthEntity.Me.Response {
-    let credential = OAuthProvider.appleCredential(withIDToken: tokens.token, rawNonce: tokens.nonce, fullName: .init(givenName: tokens.name))
+    let credential = OAuthProvider.appleCredential(
+      withIDToken: tokens.token,
+      rawNonce: tokens.nonce,
+      fullName: .init(givenName: tokens.name))
     return try await signInCredential(credential: credential)
   }
 
@@ -235,7 +238,6 @@ extension AuthUseCasePlatform {
     return me.user.serialized()
   }
 }
-
 
 extension FirebaseAuth.User {
   fileprivate func serialized() -> AuthEntity.Me.Response {

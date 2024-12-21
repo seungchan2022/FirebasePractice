@@ -111,6 +111,7 @@ struct SignInReducer {
           case true:
             sideEffect.routeToHome()
             sideEffect.useCaseGroup.toastViewModel.send(message: "애플 로그인 성공")
+
           case false:
             sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "애플 로그인 실패")
           }

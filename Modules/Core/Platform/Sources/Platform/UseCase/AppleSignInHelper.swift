@@ -1,27 +1,30 @@
-import Foundation
 import AuthenticationServices
 import CryptoKit
 import Domain
+import Foundation
+
+// MARK: - AppleAuthHelper
 
 @MainActor
-final class AppleAuthHelper: NSObject,  ASAuthorizationControllerPresentationContextProviding {
+final class AppleAuthHelper: NSObject, ASAuthorizationControllerPresentationContextProviding {
 
-  fileprivate var currentNonce: String?
-  private var completionHandler: ((Result<AuthEntity.Apple.Response, CompositeErrorRepository>) -> Void)? = .none
+  // MARK: Public
 
   // MARK: ASAuthorizationControllerPresentationContextProviding
-  public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-
-    return UIApplication.shared.firstKeyWindow ?? UIWindow()
+  public func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
+    UIApplication.shared.firstKeyWindow ?? UIWindow()
   }
 
-  func startSignInWithAppleFlow() async throws ->  AuthEntity.Apple.Response {
+  // MARK: Internal
+
+  func startSignInWithAppleFlow() async throws -> AuthEntity.Apple.Response {
     try await withCheckedThrowingContinuation { continuation in
       startSignInWithAppleFlow { result in
         switch result {
         case .success(let signInAppleResult):
           continuation.resume(returning: signInAppleResult)
           return
+
         case .failure(let error):
           continuation.resume(throwing: error)
           return
@@ -31,7 +34,6 @@ final class AppleAuthHelper: NSObject,  ASAuthorizationControllerPresentationCon
   }
 
   func startSignInWithAppleFlow(completion: @escaping (Result<AuthEntity.Apple.Response, CompositeErrorRepository>) -> Void) {
-
     let nonce = randomNonceString()
     currentNonce = nonce
     completionHandler = completion
@@ -47,18 +49,25 @@ final class AppleAuthHelper: NSObject,  ASAuthorizationControllerPresentationCon
     authorizationController.performRequests()
   }
 
+  // MARK: Fileprivate
+
+  fileprivate var currentNonce: String?
+
+  // MARK: Private
+
+  private var completionHandler: ((Result<AuthEntity.Apple.Response, CompositeErrorRepository>) -> Void)? = .none
+
   private func randomNonceString(length: Int = 32) -> String {
     precondition(length > 0)
     var randomBytes = [UInt8](repeating: 0, count: length)
     let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
     if errorCode != errSecSuccess {
       fatalError(
-        "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)"
-      )
+        "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
     }
 
     let charset: [Character] =
-    Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+      Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
 
     let nonce = randomBytes.map { byte in
       charset[Int(byte) % charset.count]
@@ -66,7 +75,6 @@ final class AppleAuthHelper: NSObject,  ASAuthorizationControllerPresentationCon
 
     return String(nonce)
   }
-
 
   @available(iOS 13, *)
   private func sha256(_ input: String) -> String {
@@ -81,16 +89,20 @@ final class AppleAuthHelper: NSObject,  ASAuthorizationControllerPresentationCon
 
 }
 
+// MARK: ASAuthorizationControllerDelegate
 
 extension AppleAuthHelper: ASAuthorizationControllerDelegate {
 
-  func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-
+  func authorizationController(
+    controller _: ASAuthorizationController,
+    didCompleteWithAuthorization authorization: ASAuthorization)
+  {
     guard
       let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
       let nonce = currentNonce,
       let appleIDToken = appleIDCredential.identityToken,
-      let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+      let idTokenString = String(data: appleIDToken, encoding: .utf8)
+    else {
       completionHandler?(.failure(.invalidTypeCasting))
       return
     }
@@ -102,13 +114,12 @@ extension AppleAuthHelper: ASAuthorizationControllerDelegate {
     completionHandler?(.success(tokens))
   }
 
-  func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+  func authorizationController(controller _: ASAuthorizationController, didCompleteWithError error: Error) {
     // Handle error.
     completionHandler?(.failure(.other(error)))
   }
 
 }
-
 
 extension UIApplication {
   fileprivate var firstKeyWindow: UIWindow? {
@@ -119,4 +130,3 @@ extension UIApplication {
       .first(where: \.isKeyWindow)
   }
 }
-

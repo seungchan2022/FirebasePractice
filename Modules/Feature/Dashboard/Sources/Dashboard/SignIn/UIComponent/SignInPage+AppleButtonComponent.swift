@@ -1,5 +1,7 @@
-import SwiftUI
 import AuthenticationServices
+import SwiftUI
+
+// MARK: - SignInPage.AppleButtonComponent
 
 extension SignInPage {
   struct AppleButtonComponent {
@@ -7,15 +9,17 @@ extension SignInPage {
   }
 }
 
+// MARK: - SignInPage.AppleButtonComponent + UIViewRepresentable
+
 extension SignInPage.AppleButtonComponent: UIViewRepresentable {
-  func makeUIView(context: Context) -> ASAuthorizationAppleIDButton {
-    return ASAuthorizationAppleIDButton(type: viewState.type, style: viewState.style)
+  func makeUIView(context _: Context) -> ASAuthorizationAppleIDButton {
+    ASAuthorizationAppleIDButton(type: viewState.type, style: viewState.style)
   }
 
-  func updateUIView(_ uiView: ASAuthorizationAppleIDButton, context: Context) {
-
-  }
+  func updateUIView(_: ASAuthorizationAppleIDButton, context _: Context) { }
 }
+
+// MARK: - SignInPage.AppleButtonComponent.ViewState
 
 extension SignInPage.AppleButtonComponent {
   struct ViewState: Equatable {
