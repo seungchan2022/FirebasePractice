@@ -14,7 +14,11 @@ let targetList: [Target] = [
     resources: ["Resources/**"],
     copyFiles: .none,
     headers: .none,
-    entitlements: .none,
+    entitlements: .dictionary([
+      "com.apple.developer.applesignin": .array([
+        .string("Default"),
+      ]),
+    ]),
     scripts: [],
     dependencies: .compositeValue,
     settings: .defaultSettings,
@@ -27,6 +31,7 @@ let targetList: [Target] = [
     mergeable: false,
     onDemandResourcesTags: .none),
 ]
+
 let project: Project = .init(
   name: "FirebasePractice",
   organizationName: "SeungChanMoon",
@@ -47,6 +52,7 @@ let project: Project = .init(
   fileHeaderTemplate: .none,
   additionalFiles: [],
   resourceSynthesizers: .default)
+
 extension [String: Plist.Value] {
   static var compositeValue: [String: Plist.Value] {
     [
@@ -66,6 +72,7 @@ extension [String: Plist.Value] {
           ]),
         ]),
       ]),
+      "DEVELOPMENT_TEAM": .string("${DEVELOPMENT_TEAM}"),
     ]
   }
 }

@@ -25,8 +25,17 @@ extension Settings {
         "CODE_SIGN_STYLE": "Automatic",
         "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
         "SWIFT_VERSION": "6.0",
+        "DEVELOPMENT_TEAM": "${DEVELOPMENT_TEAM}",
       ],
-      configurations: [],
+      configurations: [
+        .debug(
+          name: "Debug",
+          xcconfig: .relativeToRoot("Project/Application/Resources/Config.xcconfig")),
+        .release(
+          name: "Release",
+          xcconfig: .relativeToRoot("Project/Application/Resources/Config.xcconfig")),
+
+      ],
       defaultSettings: .recommended)
   }
 }
