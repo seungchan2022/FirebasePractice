@@ -71,8 +71,19 @@ extension [String: Plist.Value] {
             .string("${REVERSED_CLIENT_ID}"),
           ]),
         ]),
+        .dictionary([
+          "CFBundleTypeRole": .string("Editor"),
+          "CFBundleURLSchemes": .array([
+            .string("${KAKAO_NATIVE_APP_KEY}"),
+          ]),
+        ]),
       ]),
       "DEVELOPMENT_TEAM": .string("${DEVELOPMENT_TEAM}"),
+      "KAKAO_NATIVE_APP_KEY": .string("${KAKAO_NATIVE_APP_KEY}"),
+      "LSApplicationQueriesSchemes": .array([
+        .string("kakaokompassauth"),
+        .string("kakaolink"),
+      ]),
     ]
   }
 }

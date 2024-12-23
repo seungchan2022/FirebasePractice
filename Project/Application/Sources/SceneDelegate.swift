@@ -1,4 +1,5 @@
 import Architecture
+import KakaoSDKAuth
 import LinkNavigator
 import SwiftUI
 
@@ -27,6 +28,14 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
 
     toastViewModel.changeAction = { [weak self] isToastKeyWindow in
       self?.toastWindow?.isHidden = !isToastKeyWindow
+    }
+  }
+
+  func scene(_: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    if let url = URLContexts.first?.url {
+      if AuthApi.isKakaoTalkLoginUrl(url) {
+        _ = AuthController.handleOpenUrl(url: url)
+      }
     }
   }
 
