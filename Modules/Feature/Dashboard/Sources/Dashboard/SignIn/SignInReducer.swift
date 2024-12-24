@@ -121,6 +121,30 @@ struct SignInReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapSignInKakao:
+        state.fetchSignInKakao.isLoading = true
+        return sideEffect
+          .kakaoSignIn()
+          .cancellable(pageID: state.id, id: CancelID.requestKakaoSignIn, cancelInFlight: true)
+
+      case .fetchSignInKakao(let result):
+        state.fetchSignInKakao.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.routeToHome()
+            sideEffect.useCaseGroup.toastViewModel.send(message: "카카오 로그인 성공")
+
+          case false:
+            sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "카카오 로그인 실패")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -161,6 +185,7 @@ extension SignInReducer {
     var fetchSignInGoogle: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
     var fetchSignInApple: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+    var fetchSignInKakao: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -181,6 +206,9 @@ extension SignInReducer {
     case onTapSignInApple
     case fetchSignInApple(Result<Bool, CompositeErrorRepository>)
 
+    case onTapSignInKakao
+    case fetchSignInKakao(Result<Bool, CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 }
@@ -194,5 +222,6 @@ extension SignInReducer {
     case requestResetPassword
     case requestGoogleSignIn
     case requestAppleSignIn
+    case requestKakaoSignIn
   }
 }

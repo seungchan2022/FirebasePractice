@@ -15,6 +15,14 @@ extension SignInPage {
   private var isActiveSignIn: Bool {
     !store.emailText.isEmpty && !store.passwordText.isEmpty
   }
+
+  @MainActor
+  private var isLoading: Bool {
+    store.fetchSignIn.isLoading
+      || store.fetchSignInApple.isLoading
+      || store.fetchSignInKakao.isLoading
+      || store.fetchSignInGoogle.isLoading
+  }
 }
 
 // MARK: View
@@ -84,6 +92,12 @@ extension SignInPage: View {
             viewState: .init(type: .default, style: .black))
             .frame(height: 50)
         }
+
+        Button(action: {
+          store.send(.onTapSignInKakao)
+        }) {
+          Text("카카오 로그인")
+        }
       }
       .padding(.top, 36)
       .padding(.horizontal, 16)
@@ -96,6 +110,7 @@ extension SignInPage: View {
         .presentationDetents([.fraction(0.4)])
     }
     .onAppear { }
+    .setRequestFlightView(isLoading: isLoading)
     .onDisappear {
       store.send(.teardown)
     }

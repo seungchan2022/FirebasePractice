@@ -13,6 +13,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../../Core/Domain"),
+    .package(path: "../../Core/Architecture"),
     .package(
       url: "https://github.com/firebase/firebase-ios-sdk.git",
       .upToNextMajor(from: "11.6.0")),
@@ -28,6 +29,7 @@ let package = Package(
       name: "Platform",
       dependencies: [
         "Domain",
+        "Architecture",
         .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
         .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
         .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),

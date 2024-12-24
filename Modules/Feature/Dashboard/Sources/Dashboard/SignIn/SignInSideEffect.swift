@@ -65,6 +65,19 @@ extension SignInSideEffect {
     }
   }
 
+  var kakaoSignIn: () -> Effect<SignInReducer.Action> {
+    {
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.signInKakao()
+          await send(SignInReducer.Action.fetchSignInKakao(.success(response)))
+        } catch {
+          await send(SignInReducer.Action.fetchSignInKakao(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToSignUp: () -> Void {
     {
       navigator.next(

@@ -1,9 +1,12 @@
+import Architecture
 import Domain
 import Firebase
 import FirebaseAuth
 import FirebaseCore
 import Foundation
 import GoogleSignIn
+import KakaoSDKAuth
+import KakaoSDKUser
 import UIKit
 
 // MARK: - AuthUseCasePlatform
@@ -63,9 +66,20 @@ extension AuthUseCasePlatform: AuthUseCase {
     }
   }
 
+  public var signInKakao: () async throws -> Bool {
+    {
+      do {
+        return try await signInWithKakao()
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
   public var me: () throws -> AuthEntity.Me.Response {
     {
       guard let user = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
       return user.serialized()
     }
   }
@@ -132,6 +146,7 @@ extension AuthUseCasePlatform: AuthUseCase {
   }
 }
 
+// MARK: Email
 extension AuthUseCasePlatform {
   func createUser(email: String, password: String) async throws -> AuthEntity.Me.Response {
     let me = try await Auth.auth().createUser(withEmail: email, password: password)
@@ -179,6 +194,7 @@ extension AuthUseCasePlatform {
   }
 }
 
+// MARK: Google, Apple
 extension AuthUseCasePlatform {
   @MainActor
   func googleSignIn() async throws -> AuthEntity.Google.Response {
@@ -236,6 +252,135 @@ extension AuthUseCasePlatform {
   func signInCredential(credential: AuthCredential) async throws -> AuthEntity.Me.Response {
     let me = try await Auth.auth().signIn(with: credential)
     return me.user.serialized()
+  }
+}
+
+// MARK: Kakao
+extension AuthUseCasePlatform {
+  private func signInWithKakao() async throws -> Bool {
+    if AuthApi.hasToken() {
+      try await validateKakaoToken()
+    } else {
+      try await openKakaoService()
+    }
+  }
+
+  private func openKakaoService() async throws -> Bool {
+    if UserApi.isKakaoTalkLoginAvailable() {
+      try await handleLoginWithApp()
+    } else {
+      try await handleLoginWithWeb()
+    }
+  }
+
+  private func validateKakaoToken() async throws -> Bool {
+    try await withCheckedThrowingContinuation { continuation in
+      UserApi.shared.accessTokenInfo { _, error in
+        if error != nil {
+          Task {
+            do {
+              let result = try await openKakaoService()
+              continuation.resume(returning: result)
+            } catch {
+              continuation.resume(throwing: error)
+            }
+          }
+        } else {
+          // 토큰 유효성 체크 성공 (필요 시 토큰 갱신됨)
+          UserApi.shared.me { kakaoUser, error in
+            if let error {
+              Logger.error("기존 회원 로그인 에러 발생: \(error.localizedDescription)")
+              continuation.resume(throwing: error)
+            } else {
+              Logger.debug("기존 회원 로그인 진행")
+              guard
+                let email = kakaoUser?.kakaoAccount?.email,
+                let password = kakaoUser?.id
+              else {
+                return continuation.resume(throwing: CompositeErrorRepository.incorrectUser)
+              }
+
+              Task {
+                do {
+                  let response = try await signInEmail(.init(email: email, password: "\(password)"))
+                  continuation.resume(returning: response)
+                } catch {
+                  Logger.error("Firebase 로그인 실패: \(error.localizedDescription)")
+                  continuation.resume(throwing: error)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @MainActor
+  private func handleLoginWithApp() async throws -> Bool {
+    try await withCheckedThrowingContinuation { continuation in
+      UserApi.shared.loginWithKakaoTalk { oauthToken, error in
+        if let error {
+          Logger.error("Error during login with KakaoTalk: \(error)")
+          continuation.resume(throwing: error)
+        } else {
+          Logger.debug("loginWithKakaoTalk() success.")
+          guard oauthToken != nil else { return }
+          Task {
+            let response = try await uploadKakaoInfoToFirebase()
+            continuation.resume(returning: response)
+          }
+        }
+      }
+    }
+  }
+
+  @MainActor
+  private func handleLoginWithWeb() async throws -> Bool {
+    try await withCheckedThrowingContinuation { continuation in
+      UserApi.shared.loginWithKakaoAccount { oauthToken, error in
+        if let error {
+          Logger.error("Error during login with KakaoAccount: \(error)")
+          continuation.resume(throwing: error)
+        } else {
+          Logger.debug("loginWithKakaoAccount() success.")
+          guard oauthToken != nil else { return }
+          Task {
+            let response = try await uploadKakaoInfoToFirebase()
+            continuation.resume(returning: response)
+          }
+        }
+      }
+    }
+  }
+
+  private func uploadKakaoInfoToFirebase() async throws -> Bool {
+    try await withCheckedThrowingContinuation { continuation in
+      UserApi.shared.me { kakaoUser, error in
+        if let error {
+          Logger.error("DEBUG: 카카오톡 사용자 정보가져오기 에러 \(error.localizedDescription)")
+          continuation.resume(throwing: error)
+        } else {
+          Logger.debug("DEBUG: 카카오톡 사용자 정보 가져오기 success.")
+          guard
+            let email = kakaoUser?.kakaoAccount?.email,
+            let password = kakaoUser?.id
+          else {
+            continuation.resume(throwing: CompositeErrorRepository.incorrectUser)
+            return
+          }
+
+          Task {
+            do {
+              let response = try await signUpEmail(.init(email: email, password: "\(password)"))
+              continuation.resume(returning: response)
+            } catch {
+              continuation.resume(throwing: error)
+            }
+          }
+        }
+      }
+    }
   }
 }
 
