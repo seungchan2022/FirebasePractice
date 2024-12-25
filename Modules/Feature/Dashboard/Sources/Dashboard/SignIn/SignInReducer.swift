@@ -98,7 +98,7 @@ struct SignInReducer {
         }
 
       case .onTapSignInApple:
-        state.fetchSignInApple.isLoading = false
+        state.fetchSignInApple.isLoading = true
         return sideEffect
           .appleSignIn()
           .cancellable(pageID: state.id, id: CancelID.requestAppleSignIn, cancelInFlight: true)

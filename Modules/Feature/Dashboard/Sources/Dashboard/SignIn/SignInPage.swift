@@ -102,13 +102,18 @@ extension SignInPage: View {
       .padding(.top, 36)
       .padding(.horizontal, 16)
     }
-    .sheet(isPresented: $store.isShowResetPassword) {
-      ResetPasswordComponent(
-        viewState: .init(),
-        resetEmail: $store.resetEmailText,
-        tapAction: { store.send(.onTapResetPassword) })
-        .presentationDetents([.fraction(0.4)])
-    }
+    .background(store.isShowResetPassword ? .gray : .white)
+    .disabled(store.isShowResetPassword)
+    .overlay(content: {
+      if store.isShowResetPassword {
+        ResetPasswordComponent(
+          viewState: .init(),
+          resetEmail: $store.resetEmailText,
+          tapAction: { store.send(.onTapResetPassword) },
+          cancelAction: { store.isShowResetPassword = false })
+      }
+    })
+
     .onAppear { }
     .setRequestFlightView(isLoading: isLoading)
     .onDisappear {

@@ -9,6 +9,8 @@ extension SignInPage {
 
     let resetEmail: Binding<String>
     let tapAction: () -> Void
+
+    let cancelAction: () -> Void
   }
 }
 
@@ -38,20 +40,33 @@ extension SignInPage.ResetPasswordComponent: View {
         .textInputAutocapitalization(.never)
         .autocorrectionDisabled(true)
 
-      Button(action: { tapAction() }) {
-        Text("재설정 링크 전송")
-          .foregroundStyle(.white)
-          .frame(height: 50)
-          .frame(maxWidth: .infinity)
-          .background(.blue)
-          .clipShape(RoundedRectangle(cornerRadius: 8))
-          .opacity(resetEmail.wrappedValue.isEmpty ? 0.3 : 1.0)
+      HStack(spacing: 16) {
+        Spacer()
+
+        Button(action: { cancelAction() }) {
+          Text("취소")
+            .font(.body)
+            .frame(width: 60, height: 50)
+        }
+
+        Button(action: { tapAction() }) {
+          Text("확인")
+            .font(.body)
+            .foregroundStyle(.white)
+            .frame(width: 60, height: 50)
+            .background(.blue)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .opacity(resetEmail.wrappedValue.isEmpty ? 0.3 : 1.0)
+        }
+        .disabled(resetEmail.wrappedValue.isEmpty)
       }
-      .disabled(resetEmail.wrappedValue.isEmpty)
-      Spacer()
     }
     .padding()
-    .padding(.top, 20)
+    .frame(height: 300)
+    .background(.white)
+    .clipShape(.rect(cornerRadius: 10))
+    .shadow(radius: 10)
+    .padding(.horizontal, 10)
   }
 }
 

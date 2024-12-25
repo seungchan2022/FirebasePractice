@@ -8,11 +8,29 @@ struct HomePage {
   @Bindable var store: StoreOf<HomeReducer>
 }
 
+extension HomePage {
+  @MainActor
+  private var isLoading: Bool {
+    store.fetchUser.isLoading
+  }
+
+  @MainActor
+  private var isActiveUpdatePassword: Bool {
+    !store.currPasswordText.isEmpty && !store.newPasswordText.isEmpty
+  }
+}
+
 // MARK: View
 
 extension HomePage: View {
   var body: some View {
     List {
+      Section {
+        Button(action: { store.send(.routeToMe) }) {
+          Text("이동")
+        }
+      }
+
       Section {
         Text("uid: \(store.user.uid)")
         Text("email: \(store.user.email ?? "No Email")")
@@ -23,7 +41,11 @@ extension HomePage: View {
 
       if store.providerList.contains(.email) {
         Section {
-          Button(action: { store.isShowUpdatePassword = true }) {
+          Button(action: {
+            store.currPasswordText = ""
+            store.newPasswordText = ""
+            store.isShowUpdatePassword = true
+          }) {
             Text("비밀번호 변경")
           }
         }
@@ -67,7 +89,9 @@ extension HomePage: View {
             .frame(maxWidth: .infinity)
             .background(.blue)
             .clipShape(RoundedRectangle(cornerRadius: 8))
+            .opacity(isActiveUpdatePassword ? 1.0 : 0.3)
         }
+        .disabled(!isActiveUpdatePassword)
       }
       .padding(16)
       .presentationDetents([.fraction(0.45)])
@@ -104,10 +128,12 @@ extension HomePage: View {
     } message: {
       Text("계정을 탈퇴 하려면 현재 비밀번호를 입력하고, 확인 버튼을 눌러주세요.")
     }
+
     .onAppear {
       store.send(.getUser)
       store.send(.getProvider)
     }
+    .setRequestFlightView(isLoading: isLoading)
     .onDisappear {
       store.send(.teardown)
     }
