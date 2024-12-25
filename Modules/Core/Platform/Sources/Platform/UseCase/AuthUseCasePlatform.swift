@@ -87,7 +87,8 @@ extension AuthUseCasePlatform: AuthUseCase {
   public var signOut: () throws -> Bool {
     {
       do {
-        let _ = try logOut()
+        try logOut()
+        signOutWithKakao()
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -325,7 +326,8 @@ extension AuthUseCasePlatform {
           continuation.resume(throwing: error)
         } else {
           Logger.debug("loginWithKakaoTalk() success.")
-          guard oauthToken != nil else { return }
+
+          guard oauthToken != nil else { return continuation.resume(throwing: CompositeErrorRepository.networkUnauthorized) }
           Task {
             let response = try await uploadKakaoInfoToFirebase()
             continuation.resume(returning: response)
@@ -344,7 +346,7 @@ extension AuthUseCasePlatform {
           continuation.resume(throwing: error)
         } else {
           Logger.debug("loginWithKakaoAccount() success.")
-          guard oauthToken != nil else { return }
+          guard oauthToken != nil else { return continuation.resume(throwing: CompositeErrorRepository.networkUnauthorized) }
           Task {
             let response = try await uploadKakaoInfoToFirebase()
             continuation.resume(returning: response)
@@ -369,17 +371,41 @@ extension AuthUseCasePlatform {
             continuation.resume(throwing: CompositeErrorRepository.incorrectUser)
             return
           }
-
           Task {
             do {
               let response = try await signUpEmail(.init(email: email, password: "\(password)"))
               continuation.resume(returning: response)
             } catch {
-              continuation.resume(throwing: error)
+              // error가 CompositeErrorRepository.other라는 케이스인지를 확인합니다.
+              // 해당 케이스라면 내부의 authError 값을 추출합니다.
+              // 추출한 authError 값을 NSError로 변환한 뒤, code가 emailAlreadyInUse 오류 코드와 같은지 확인합니다.
+              if
+                case CompositeErrorRepository.other(let authError) = error,
+                (authError as NSError).code == AuthErrorCode.emailAlreadyInUse.rawValue
+              {
+                // 조건을 모두 만족하면 이 블록이 실행됩니다.
+                Logger.debug("DEBUG: 이미 가입된 계정입니다. 로그인 진행.")
+                do {
+                  let response = try await signInEmail(.init(email: email, password: "\(password)"))
+                  continuation.resume(returning: response)
+                } catch {
+                  Logger.error("DEBUG: 로그인 실패")
+                  continuation.resume(throwing: error)
+                }
+              } else {
+                continuation.resume(throwing: error)
+              }
             }
           }
         }
       }
+    }
+  }
+
+  private func signOutWithKakao() {
+    UserApi.shared.logout { error in
+      guard let error else { return }
+      Logger.error("카카오 로그아웃 에러")
     }
   }
 }

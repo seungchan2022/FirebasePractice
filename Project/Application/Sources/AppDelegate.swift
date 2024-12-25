@@ -17,11 +17,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil)
     -> Bool
   {
-    guard let kakaoAppKey = Bundle.main.infoDictionary?["KAKAO_NATIVE_APP_KEY"] as? String else { return false }
-
-    KakaoSDK.initSDK(appKey: kakaoAppKey)
-
     FirebaseApp.configure()
+
+    guard let kakaoAppKey = Bundle.main.infoDictionary?["KAKAO_NATIVE_APP_KEY"] as? String else { return false }
+    KakaoSDK.initSDK(appKey: kakaoAppKey)
 
     return true
   }
