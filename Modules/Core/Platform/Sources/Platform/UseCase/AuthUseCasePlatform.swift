@@ -88,7 +88,10 @@ extension AuthUseCasePlatform: AuthUseCase {
     {
       do {
         try logOut()
-        signOutWithKakao()
+        
+        if AuthApi.hasToken() {
+          signOutWithKakao()
+        }
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -405,7 +408,7 @@ extension AuthUseCasePlatform {
   private func signOutWithKakao() {
     UserApi.shared.logout { error in
       guard let error else { return }
-      Logger.error("카카오 로그아웃 에러")
+      Logger.error("카카오 로그아웃 에러 \(error.localizedDescription)")
     }
   }
 }
