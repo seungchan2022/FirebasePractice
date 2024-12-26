@@ -88,7 +88,7 @@ extension AuthUseCasePlatform: AuthUseCase {
     {
       do {
         try logOut()
-        
+
         if AuthApi.hasToken() {
           signOutWithKakao()
         }
@@ -115,6 +115,16 @@ extension AuthUseCasePlatform: AuthUseCase {
       do {
         let _ = try await deleteUser(password: currPassword)
         return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var deleteKakaoUser: () async throws -> Bool {
+    {
+      do {
+        return try await deleteKakao()
       } catch {
         throw CompositeErrorRepository.other(error)
       }
@@ -409,6 +419,52 @@ extension AuthUseCasePlatform {
     UserApi.shared.logout { error in
       guard let error else { return }
       Logger.error("카카오 로그아웃 에러 \(error.localizedDescription)")
+    }
+  }
+
+  private func deleteKakao() async throws -> Bool {
+    try await withCheckedThrowingContinuation { continuation in
+      UserApi.shared.me { kakaoUser, error in
+        if let error {
+          continuation.resume(throwing: error)
+          return
+        }
+
+        guard
+          let email = kakaoUser?.kakaoAccount?.email,
+          let password = kakaoUser?.id
+        else {
+          continuation.resume(throwing: CompositeErrorRepository.incorrectUser)
+          return
+        }
+
+        guard let me = Auth.auth().currentUser else {
+          continuation.resume(throwing: CompositeErrorRepository.incorrectUser)
+          return
+        }
+
+        let credential = EmailAuthProvider.credential(withEmail: email, password: "\(password)")
+
+        Task {
+          do {
+            try await unlink()
+            try await me.reauthenticate(with: credential)
+            try await me.delete()
+
+            continuation.resume(returning: true)
+          } catch {
+            continuation.resume(throwing: error)
+          }
+        }
+      }
+    }
+  }
+
+  private func unlink() async throws {
+    UserApi.shared.unlink { error in
+      guard let error else { return Logger.debug("unlink() success.") }
+
+      return Logger.error("\(error)")
     }
   }
 }

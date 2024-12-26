@@ -26,12 +26,6 @@ extension HomePage: View {
   var body: some View {
     List {
       Section {
-        Button(action: { store.send(.routeToMe) }) {
-          Text("이동")
-        }
-      }
-
-      Section {
         Text("uid: \(store.user.uid)")
         Text("email: \(store.user.email ?? "No Email")")
         Text("userName: \(store.user.userName ?? "No Name")")
@@ -63,6 +57,13 @@ extension HomePage: View {
           store.passwordText = ""
         }) {
           Text("계정 탈퇴")
+        }
+
+        Button(role: .destructive, action: {
+          store.isShowDeleteKakaoUserAlert = true
+
+        }) {
+          Text("카카오 계정 탈퇴")
         }
       }
     }
@@ -127,6 +128,20 @@ extension HomePage: View {
       }
     } message: {
       Text("계정을 탈퇴 하려면 현재 비밀번호를 입력하고, 확인 버튼을 눌러주세요.")
+    }
+    .alert(
+      "카카오 계정을 탈퇴하시겟습니까?",
+      isPresented: $store.isShowDeleteKakaoUserAlert)
+    {
+      Button(role: .destructive, action: { store.send(.onTapDeleteKakaoUser) }) {
+        Text("확인")
+      }
+
+      Button(role: .cancel, action: { store.isShowDeleteKakaoUserAlert = false }) {
+        Text("취소")
+      }
+    } message: {
+      Text("계정을 탈퇴 하려면, 확인 버튼을 눌러주세요.")
     }
 
     .onAppear {

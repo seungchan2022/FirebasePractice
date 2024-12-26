@@ -64,6 +64,19 @@ extension HomeSideEffect {
     }
   }
 
+  var deleteKakaoUser: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.deleteKakaoUser()
+          await send(HomeReducer.Action.fetchDeleteKakaoUser(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchDeleteKakaoUser(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var getProvider: () -> Effect<HomeReducer.Action> {
     {
       .run { send in
