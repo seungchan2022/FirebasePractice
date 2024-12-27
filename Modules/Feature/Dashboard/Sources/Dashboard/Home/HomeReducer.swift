@@ -139,6 +139,30 @@ struct HomeReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapDeleteGoogleUser:
+        state.fetchDeleteGoogleUser.isLoading = true
+        return sideEffect
+          .deleteGoogleUser()
+          .cancellable(pageID: state.id, id: CancelID.requestDeleteGoogleUser, cancelInFlight: true)
+
+      case .fetchDeleteGoogleUser(let result):
+        state.fetchDeleteGoogleUser.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.useCaseGroup.toastViewModel.send(message: "구글 계정이 탈퇴되었습니다!")
+            sideEffect.routeToSignIn()
+
+          case false:
+            sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "구글 계정 탈퇴중 오류가 발생했습니다.")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .getProvider:
         state.fetchProvider.isLoading = true
         return sideEffect
@@ -190,6 +214,7 @@ extension HomeReducer {
     var isShowNewPassword = false
     var isShowDeleteUserAlert = false
     var isShowDeleteKakaoUserAlert = false
+    var isShowDeleteGoogleUserAlert = false
     var isShowSignOutAlert = false
 
     var currPasswordText = ""
@@ -202,6 +227,7 @@ extension HomeReducer {
 
     var fetchDeleteUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchDeleteKakaoUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+    var fetchDeleteGoogleUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
   }
 
@@ -224,6 +250,9 @@ extension HomeReducer {
     case onTapDeleteKakaoUser
     case fetchDeleteKakaoUser(Result<Bool, CompositeErrorRepository>)
 
+    case onTapDeleteGoogleUser
+    case fetchDeleteGoogleUser(Result<Bool, CompositeErrorRepository>)
+
     case getProvider
     case fetchProvider(Result<[AuthEntity.ProviderOption.Option], CompositeErrorRepository>)
 
@@ -242,6 +271,7 @@ extension HomeReducer {
     case requestUpdatePassword
     case requestDeleteUser
     case requestDeleteKakaoUser
+    case requestDeleteGoogleUser
     case requestGetProvider
   }
 }

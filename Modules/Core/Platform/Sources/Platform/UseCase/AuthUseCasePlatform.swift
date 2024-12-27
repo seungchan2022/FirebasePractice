@@ -92,6 +92,8 @@ extension AuthUseCasePlatform: AuthUseCase {
         if AuthApi.hasToken() {
           signOutWithKakao()
         }
+
+        GIDSignIn.sharedInstance.signOut()
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -125,6 +127,35 @@ extension AuthUseCasePlatform: AuthUseCase {
     {
       do {
         return try await deleteKakao()
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var deleteGoogleUser: () async throws -> Bool {
+    {
+      do {
+        guard let googleUser = GIDSignIn.sharedInstance.currentUser else {
+          throw CompositeErrorRepository.incorrectUser
+        }
+
+        // 토큰이 만료 되었을 경우에만 갱신
+        try await googleUser.refreshTokensIfNeeded()
+
+        let idToken = googleUser.idToken?.tokenString
+        let accessToken = googleUser.accessToken.tokenString
+
+        guard let idToken else {
+          throw CompositeErrorRepository.invalidTypeCasting
+        }
+
+        // Firebase 유저 삭제
+        let tokens = AuthEntity.Google.Response(idToken: idToken, accessToken: accessToken)
+        try await deleteGoogle(tokens: tokens)
+        try await GIDSignIn.sharedInstance.disconnect() // 연결 끊기
+
+        return true
       } catch {
         throw CompositeErrorRepository.other(error)
       }
@@ -210,6 +241,9 @@ extension AuthUseCasePlatform {
 
 // MARK: Google, Apple
 extension AuthUseCasePlatform {
+
+  // MARK: Internal
+
   @MainActor
   func googleSignIn() async throws -> AuthEntity.Google.Response {
     try await withCheckedThrowingContinuation { continuation in
@@ -267,6 +301,18 @@ extension AuthUseCasePlatform {
     let me = try await Auth.auth().signIn(with: credential)
     return me.user.serialized()
   }
+
+  // MARK: Private
+
+  private func deleteGoogle(tokens: AuthEntity.Google.Response) async throws {
+    guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+    let credential = GoogleAuthProvider.credential(withIDToken: tokens.idToken, accessToken: tokens.accessToken)
+
+    try await me.reauthenticate(with: credential)
+    try await me.delete()
+  }
+
 }
 
 // MARK: Kakao

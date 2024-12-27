@@ -51,19 +51,31 @@ extension HomePage: View {
         }
       }
 
-      Section {
-        Button(role: .destructive, action: {
-          store.isShowDeleteUserAlert = true
-          store.passwordText = ""
-        }) {
-          Text("계정 탈퇴")
+      if store.providerList.contains(.email) {
+        Section {
+          Button(role: .destructive, action: {
+            store.isShowDeleteUserAlert = true
+            store.passwordText = ""
+          }) {
+            Text("이메일 계정 탈퇴")
+          }
+
+          Button(role: .destructive, action: {
+            store.isShowDeleteKakaoUserAlert = true
+
+          }) {
+            Text("카카오 계정 탈퇴")
+          }
         }
+      }
 
-        Button(role: .destructive, action: {
-          store.isShowDeleteKakaoUserAlert = true
-
-        }) {
-          Text("카카오 계정 탈퇴")
+      if store.providerList.contains(.google) {
+        Section {
+          Button(role: .destructive, action: {
+            store.isShowDeleteGoogleUserAlert = true
+          }) {
+            Text("구글 계정 탈퇴")
+          }
         }
       }
     }
@@ -138,6 +150,20 @@ extension HomePage: View {
       }
 
       Button(role: .cancel, action: { store.isShowDeleteKakaoUserAlert = false }) {
+        Text("취소")
+      }
+    } message: {
+      Text("계정을 탈퇴 하려면, 확인 버튼을 눌러주세요.")
+    }
+    .alert(
+      "구글 계정을 탈퇴하시겟습니까?",
+      isPresented: $store.isShowDeleteGoogleUserAlert)
+    {
+      Button(role: .destructive, action: { store.send(.onTapDeleteGoogleUser) }) {
+        Text("확인")
+      }
+
+      Button(role: .cancel, action: { store.isShowDeleteGoogleUserAlert = false }) {
         Text("취소")
       }
     } message: {

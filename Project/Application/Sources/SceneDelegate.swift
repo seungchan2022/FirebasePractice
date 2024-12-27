@@ -1,4 +1,5 @@
 import Architecture
+import GoogleSignIn
 import KakaoSDKAuth
 import LinkNavigator
 import SwiftUI
@@ -35,6 +36,8 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
     if let url = URLContexts.first?.url {
       if AuthApi.isKakaoTalkLoginUrl(url) {
         _ = AuthController.handleOpenUrl(url: url)
+      } else {
+        GIDSignIn.sharedInstance.handle(url)
       }
     }
   }

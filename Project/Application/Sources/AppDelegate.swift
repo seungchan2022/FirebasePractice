@@ -22,6 +22,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     guard let kakaoAppKey = Bundle.main.infoDictionary?["KAKAO_NATIVE_APP_KEY"] as? String else { return false }
     KakaoSDK.initSDK(appKey: kakaoAppKey)
 
+    GIDSignIn.sharedInstance.restorePreviousSignIn()
     return true
   }
 

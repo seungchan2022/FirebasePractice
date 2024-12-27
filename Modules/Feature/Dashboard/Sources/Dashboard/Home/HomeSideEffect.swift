@@ -77,6 +77,19 @@ extension HomeSideEffect {
     }
   }
 
+  var deleteGoogleUser: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.deleteGoogleUser()
+          await send(HomeReducer.Action.fetchDeleteGoogleUser(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchDeleteGoogleUser(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var getProvider: () -> Effect<HomeReducer.Action> {
     {
       .run { send in
