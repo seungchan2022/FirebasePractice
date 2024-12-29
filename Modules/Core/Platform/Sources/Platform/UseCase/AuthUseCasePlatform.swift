@@ -1,4 +1,5 @@
 import Architecture
+import AuthenticationServices
 import Domain
 import Firebase
 import FirebaseAuth
@@ -155,6 +156,54 @@ extension AuthUseCasePlatform: AuthUseCase {
         try await deleteGoogle(tokens: tokens)
         try await GIDSignIn.sharedInstance.disconnect() // 연결 끊기
 
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var deleteAppleUser: () async throws -> Bool {
+    {
+      guard let me = Auth.auth().currentUser else {
+        throw CompositeErrorRepository.incorrectUser
+      }
+
+      guard let lastSignInDate = me.metadata.lastSignInDate else {
+        return false
+      }
+
+      let needsReauth = !lastSignInDate.isWithinPast(minutes: 5)
+      let needsTokenRevocation = me.providerData.contains(where: { $0.providerID == "apple.com" })
+
+      do {
+        if needsReauth || needsTokenRevocation {
+          // Apple 재인증 과정
+          let appleAuthHelper = await AppleAuthHelper()
+          let response = try await appleAuthHelper.startSignInWithAppleFlow()
+
+          let credential = OAuthProvider.appleCredential(
+            withIDToken: response.token,
+            rawNonce: response.nonce,
+            fullName: .none)
+
+          if needsReauth {
+            // Firebase에서 사용자 재인증
+            try await me.reauthenticate(with: credential)
+          }
+
+          if needsTokenRevocation {
+            guard let authorizationCode = response.authorizationCode else {
+              throw CompositeErrorRepository.invalidTypeCasting
+            }
+            guard let authCodeString = String(data: authorizationCode, encoding: .utf8) else {
+              throw CompositeErrorRepository.invalidTypeCasting
+            }
+            try await Auth.auth().revokeToken(withAuthorizationCode: authCodeString)
+          }
+        }
+
+        try await me.delete()
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -532,5 +581,14 @@ extension UIApplication {
       .filter { $0.activationState == .foregroundActive }
       .first?.windows
       .first(where: \.isKeyWindow)
+  }
+}
+
+extension Date {
+  fileprivate func isWithinPast(minutes: Int) -> Bool {
+    let now = Date.now
+    let timeAgo = Date.now.addingTimeInterval(-1 * TimeInterval(60 * minutes))
+    let range = timeAgo...now
+    return range.contains(self)
   }
 }

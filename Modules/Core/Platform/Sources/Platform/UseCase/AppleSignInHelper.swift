@@ -108,8 +108,9 @@ extension AppleAuthHelper: ASAuthorizationControllerDelegate {
     }
 
     let name = appleIDCredential.fullName?.givenName
+    let authorizationCode = appleIDCredential.authorizationCode
 
-    let tokens = AuthEntity.Apple.Response(token: idTokenString, nonce: nonce, name: name)
+    let tokens = AuthEntity.Apple.Response(token: idTokenString, nonce: nonce, name: name, authorizationCode: authorizationCode)
 
     completionHandler?(.success(tokens))
   }

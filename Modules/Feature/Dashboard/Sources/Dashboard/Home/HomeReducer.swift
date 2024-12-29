@@ -163,6 +163,30 @@ struct HomeReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapDeleteAppleUser:
+        state.fetchDeleteAppleUser.isLoading = true
+        return sideEffect
+          .deleteAppleUser()
+          .cancellable(pageID: state.id, id: CancelID.requestDeleteAppleUser, cancelInFlight: true)
+
+      case .fetchDeleteAppleUser(let result):
+        state.fetchDeleteAppleUser.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.useCaseGroup.toastViewModel.send(message: "애플 계정이 탈퇴되었습니다!")
+            sideEffect.routeToSignIn()
+
+          case false:
+            sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "애플 계정 탈퇴중 오류가 발생했습니다.")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .getProvider:
         state.fetchProvider.isLoading = true
         return sideEffect
@@ -215,6 +239,7 @@ extension HomeReducer {
     var isShowDeleteUserAlert = false
     var isShowDeleteKakaoUserAlert = false
     var isShowDeleteGoogleUserAlert = false
+    var isShowDeleteAppleUserAlert = false
     var isShowSignOutAlert = false
 
     var currPasswordText = ""
@@ -228,6 +253,7 @@ extension HomeReducer {
     var fetchDeleteUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchDeleteKakaoUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchDeleteGoogleUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+    var fetchDeleteAppleUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
   }
 
@@ -253,6 +279,9 @@ extension HomeReducer {
     case onTapDeleteGoogleUser
     case fetchDeleteGoogleUser(Result<Bool, CompositeErrorRepository>)
 
+    case onTapDeleteAppleUser
+    case fetchDeleteAppleUser(Result<Bool, CompositeErrorRepository>)
+
     case getProvider
     case fetchProvider(Result<[AuthEntity.ProviderOption.Option], CompositeErrorRepository>)
 
@@ -272,6 +301,7 @@ extension HomeReducer {
     case requestDeleteUser
     case requestDeleteKakaoUser
     case requestDeleteGoogleUser
+    case requestDeleteAppleUser
     case requestGetProvider
   }
 }

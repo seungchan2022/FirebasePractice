@@ -22,6 +22,8 @@ public protocol AuthUseCase: Sendable {
 
   var deleteGoogleUser: () async throws -> Bool { get }
 
+  var deleteAppleUser: () async throws -> Bool { get }
+
   var resetPassword: (String) async throws -> Bool { get }
 
   var getProvider: () throws -> [AuthEntity.ProviderOption.Option] { get }

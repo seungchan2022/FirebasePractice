@@ -90,6 +90,19 @@ extension HomeSideEffect {
     }
   }
 
+  var deleteAppleUser: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let response = try await useCaseGroup.authUseCase.deleteAppleUser()
+          await send(HomeReducer.Action.fetchDeleteAppleUser(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchDeleteAppleUser(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var getProvider: () -> Effect<HomeReducer.Action> {
     {
       .run { send in

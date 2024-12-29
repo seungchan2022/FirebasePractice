@@ -78,6 +78,16 @@ extension HomePage: View {
           }
         }
       }
+
+      if store.providerList.contains(.apple) {
+        Section {
+          Button(role: .destructive, action: {
+            store.isShowDeleteAppleUserAlert = true
+          }) {
+            Text("애플 계정 탈퇴")
+          }
+        }
+      }
     }
     .sheet(isPresented: $store.isShowUpdatePassword) {
       VStack(spacing: 48) {
@@ -164,6 +174,20 @@ extension HomePage: View {
       }
 
       Button(role: .cancel, action: { store.isShowDeleteGoogleUserAlert = false }) {
+        Text("취소")
+      }
+    } message: {
+      Text("계정을 탈퇴 하려면, 확인 버튼을 눌러주세요.")
+    }
+    .alert(
+      "애플 계정을 탈퇴하시겟습니까?",
+      isPresented: $store.isShowDeleteAppleUserAlert)
+    {
+      Button(role: .destructive, action: { store.send(.onTapDeleteAppleUser) }) {
+        Text("확인")
+      }
+
+      Button(role: .cancel, action: { store.isShowDeleteAppleUserAlert = false }) {
         Text("취소")
       }
     } message: {

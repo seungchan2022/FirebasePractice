@@ -13,15 +13,18 @@ extension AuthEntity.Apple {
     public let token: String
     public let nonce: String
     public let name: String?
+    public let authorizationCode: Data?
 
     public init(
       token: String,
       nonce: String,
-      name: String?)
+      name: String?,
+      authorizationCode: Data?)
     {
       self.token = token
       self.nonce = nonce
       self.name = name
+      self.authorizationCode = authorizationCode
     }
   }
 }
