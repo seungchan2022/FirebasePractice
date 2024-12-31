@@ -4,6 +4,7 @@ import Architecture
 import Domain
 import FirebaseAuth
 import FirebaseCore
+import FirebaseFirestore
 import GoogleSignIn
 import GoogleSignInSwift
 import KakaoSDKAuth

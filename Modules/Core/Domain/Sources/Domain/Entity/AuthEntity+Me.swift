@@ -14,17 +14,20 @@ extension AuthEntity.Me {
     public let email: String?
     public let userName: String?
     public let photoURL: String?
+    public let dateCreated: Date?
 
     public init(
       uid: String,
       email: String?,
       userName: String?,
-      photoURL: String?)
+      photoURL: String?,
+      dateCreated: Date?)
     {
       self.uid = uid
       self.email = email
       self.userName = userName
       self.photoURL = photoURL
+      self.dateCreated = dateCreated
     }
   }
 }

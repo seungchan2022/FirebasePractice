@@ -13,6 +13,11 @@ extension SignUpPage {
   private var isActiveSignUp: Bool {
     !store.emailText.isEmpty && !store.passwordText.isEmpty
   }
+
+  @MainActor
+  private var isLoading: Bool {
+    store.fetchSignUp.isLoading
+  }
 }
 
 // MARK: View
@@ -49,6 +54,7 @@ extension SignUpPage: View {
       .padding(.top, 36)
       .padding(.horizontal, 16)
     }
+    .setRequestFlightView(isLoading: isLoading)
     .onAppear { }
     .onDisappear {
       store.send(.teardown)

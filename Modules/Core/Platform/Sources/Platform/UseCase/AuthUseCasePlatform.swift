@@ -4,6 +4,7 @@ import Domain
 import Firebase
 import FirebaseAuth
 import FirebaseCore
+import FirebaseFirestore
 import Foundation
 import GoogleSignIn
 import KakaoSDKAuth
@@ -23,7 +24,10 @@ extension AuthUseCasePlatform: AuthUseCase {
   public var signUpEmail: (AuthEntity.Email.Request) async throws -> Bool {
     { req in
       do {
-        let _ = try await createUser(email: req.email, password: req.password)
+        let authDataResult = try await createUser(email: req.email, password: req.password)
+
+        try await createNewUser(auth: authDataResult)
+
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -46,7 +50,8 @@ extension AuthUseCasePlatform: AuthUseCase {
     {
       do {
         let tokens = try await googleSignIn()
-        try await signInWithGoogle(tokens: tokens)
+        let authDataResult = try await signInWithGoogle(tokens: tokens)
+        try await createNewSSOUser(auth: authDataResult)
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -59,7 +64,8 @@ extension AuthUseCasePlatform: AuthUseCase {
       do {
         let helper = await AppleAuthHelper()
         let tokens = try await helper.startSignInWithAppleFlow()
-        try await signInWithApple(tokens: tokens)
+        let authDataResult = try await signInWithApple(tokens: tokens)
+        try await createNewSSOUser(auth: authDataResult)
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -242,6 +248,30 @@ extension AuthUseCasePlatform: AuthUseCase {
 
 // MARK: Email
 extension AuthUseCasePlatform {
+  func createNewUser(auth: AuthEntity.Me.Response) async throws {
+    var userData: [String: Any] = [
+      "uid": auth.uid,
+    ]
+
+    if let email = auth.email {
+      userData["email"] = email
+    }
+
+    if let userName = auth.userName {
+      userData["userName"] = userName
+    }
+
+    if let photoURL = auth.photoURL {
+      userData["photoURL"] = photoURL
+    }
+
+    if let dateCreated = auth.dateCreated {
+      userData["dateCreated"] = dateCreated
+    }
+
+    try await Firestore.firestore().collection("users").document(auth.uid).setData(userData, merge: false)
+  }
+
   func createUser(email: String, password: String) async throws -> AuthEntity.Me.Response {
     let me = try await Auth.auth().createUser(withEmail: email, password: password)
 
@@ -326,6 +356,35 @@ extension AuthUseCasePlatform {
           continuation.resume(throwing: CompositeErrorRepository.invalidTypeCasting)
         }
       }
+    }
+  }
+
+  func createNewSSOUser(auth: AuthEntity.Me.Response) async throws {
+    let userRef = Firestore.firestore().collection("users").document(auth.uid)
+    let documentSnapshot = try await userRef.getDocument()
+
+    if !documentSnapshot.exists {
+      var userData: [String: Any] = [
+        "uid": auth.uid,
+      ]
+
+      if let email = auth.email {
+        userData["email"] = email
+      }
+
+      if let userName = auth.userName {
+        userData["userName"] = userName
+      }
+
+      if let photoURL = auth.photoURL {
+        userData["photoURL"] = photoURL
+      }
+
+      if let dateCreated = auth.dateCreated {
+        userData["dateCreated"] = dateCreated
+      }
+
+      try await userRef.setData(userData)
     }
   }
 
@@ -570,7 +629,8 @@ extension FirebaseAuth.User {
       uid: uid,
       email: email,
       userName: displayName,
-      photoURL: photoURL?.absoluteString)
+      photoURL: photoURL?.absoluteString,
+      dateCreated: .now)
   }
 }
 
