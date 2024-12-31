@@ -25,8 +25,7 @@ extension AuthUseCasePlatform: AuthUseCase {
     { req in
       do {
         let authDataResult = try await createUser(email: req.email, password: req.password)
-
-        try await createNewUser(auth: authDataResult)
+        try await createNewUser(user: authDataResult)
 
         return true
       } catch {
@@ -51,7 +50,7 @@ extension AuthUseCasePlatform: AuthUseCase {
       do {
         let tokens = try await googleSignIn()
         let authDataResult = try await signInWithGoogle(tokens: tokens)
-        try await createNewSSOUser(auth: authDataResult)
+        try await createNewSSOUser(user: authDataResult)
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -65,7 +64,7 @@ extension AuthUseCasePlatform: AuthUseCase {
         let helper = await AppleAuthHelper()
         let tokens = try await helper.startSignInWithAppleFlow()
         let authDataResult = try await signInWithApple(tokens: tokens)
-        try await createNewSSOUser(auth: authDataResult)
+        try await createNewSSOUser(user: authDataResult)
         return true
       } catch {
         throw CompositeErrorRepository.other(error)
@@ -248,30 +247,13 @@ extension AuthUseCasePlatform: AuthUseCase {
 
 // MARK: Email
 extension AuthUseCasePlatform {
-  func createNewUser(auth: AuthEntity.Me.Response) async throws {
-    var userData: [String: Any] = [
-      "uid": auth.uid,
-    ]
 
-    if let email = auth.email {
-      userData["email"] = email
-    }
-
-    if let userName = auth.userName {
-      userData["userName"] = userName
-    }
-
-    if let photoURL = auth.photoURL {
-      userData["photoURL"] = photoURL
-    }
-
-    if let dateCreated = auth.dateCreated {
-      userData["dateCreated"] = dateCreated
-    }
-
-    try await Firestore.firestore().collection("users").document(auth.uid).setData(userData, merge: false)
+  /// DB에 저장
+  func createNewUser(user: AuthEntity.Me.Response) async throws {
+    try Firestore.firestore().collection("users").document(user.uid).setData(from: user, merge: false)
   }
 
+  /// 기본 Auth 로직 수행
   func createUser(email: String, password: String) async throws -> AuthEntity.Me.Response {
     let me = try await Auth.auth().createUser(withEmail: email, password: password)
 
@@ -359,32 +341,12 @@ extension AuthUseCasePlatform {
     }
   }
 
-  func createNewSSOUser(auth: AuthEntity.Me.Response) async throws {
-    let userRef = Firestore.firestore().collection("users").document(auth.uid)
+  func createNewSSOUser(user: AuthEntity.Me.Response) async throws {
+    let userRef = Firestore.firestore().collection("users").document(user.uid)
     let documentSnapshot = try await userRef.getDocument()
 
     if !documentSnapshot.exists {
-      var userData: [String: Any] = [
-        "uid": auth.uid,
-      ]
-
-      if let email = auth.email {
-        userData["email"] = email
-      }
-
-      if let userName = auth.userName {
-        userData["userName"] = userName
-      }
-
-      if let photoURL = auth.photoURL {
-        userData["photoURL"] = photoURL
-      }
-
-      if let dateCreated = auth.dateCreated {
-        userData["dateCreated"] = dateCreated
-      }
-
-      try await userRef.setData(userData)
+      try userRef.setData(from: user, merge: false)
     }
   }
 
@@ -630,7 +592,8 @@ extension FirebaseAuth.User {
       email: email,
       userName: displayName,
       photoURL: photoURL?.absoluteString,
-      dateCreated: .now)
+      created: .now,
+      isPremium: false)
   }
 }
 

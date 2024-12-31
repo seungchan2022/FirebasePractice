@@ -28,7 +28,8 @@ extension HomePage: View {
       Section {
         Text("uid: \(store.user.uid)")
         Text("email: \(store.user.email ?? "No Email")")
-        Text("userName: \(store.user.userName ?? "No Name")")
+        Text("user_name: \(store.user.userName ?? "No Name")")
+        Text("created: \(store.user.created ?? Date())")
       } header: {
         Text("프로필")
       }

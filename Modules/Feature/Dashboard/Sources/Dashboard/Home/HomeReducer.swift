@@ -228,7 +228,7 @@ extension HomeReducer {
 
     let id: UUID
 
-    var user: AuthEntity.Me.Response = .init(uid: "", email: "", userName: "", photoURL: "", dateCreated: .none)
+    var user: AuthEntity.Me.Response = .init(uid: "", email: "", userName: "", photoURL: "", created: .none, isPremium: false)
 
     var providerList: [AuthEntity.ProviderOption.Option] = []
     var fetchProvider: FetchState.Data<[AuthEntity.ProviderOption.Option]?> = .init(isLoading: false, value: .none)
