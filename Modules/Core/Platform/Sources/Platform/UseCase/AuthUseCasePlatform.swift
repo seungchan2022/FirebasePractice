@@ -82,11 +82,11 @@ extension AuthUseCasePlatform: AuthUseCase {
     }
   }
 
-  public var me: () throws -> AuthEntity.Me.Response {
+  public var me: () async throws -> AuthEntity.Me.Response {
     {
       guard let user = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
 
-      return user.serialized()
+      return try await getUser(uid: user.uid)
     }
   }
 
@@ -247,6 +247,9 @@ extension AuthUseCasePlatform: AuthUseCase {
 
 // MARK: Email
 extension AuthUseCasePlatform {
+  func getUser(uid: String) async throws -> AuthEntity.Me.Response {
+    try await Firestore.firestore().collection("users").document(uid).getDocument(as: AuthEntity.Me.Response.self)
+  }
 
   /// DB에 저장
   func createNewUser(user: AuthEntity.Me.Response) async throws {
@@ -592,8 +595,7 @@ extension FirebaseAuth.User {
       email: email,
       userName: displayName,
       photoURL: photoURL?.absoluteString,
-      created: .now,
-      isPremium: false)
+      created: Date())
   }
 }
 

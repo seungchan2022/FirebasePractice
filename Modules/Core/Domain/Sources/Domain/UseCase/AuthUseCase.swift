@@ -10,7 +10,7 @@ public protocol AuthUseCase: Sendable {
 
   var signInKakao: () async throws -> Bool { get }
 
-  var me: () throws -> AuthEntity.Me.Response { get }
+  var me: () async throws -> AuthEntity.Me.Response { get }
 
   var signOut: () throws -> Bool { get }
 

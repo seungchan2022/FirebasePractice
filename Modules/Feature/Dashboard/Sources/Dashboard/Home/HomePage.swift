@@ -26,10 +26,12 @@ extension HomePage: View {
   var body: some View {
     List {
       Section {
-        Text("uid: \(store.user.uid)")
-        Text("email: \(store.user.email ?? "No Email")")
-        Text("user_name: \(store.user.userName ?? "No Name")")
-        Text("created: \(store.user.created ?? Date())")
+        if let user = store.user {
+          Text("uid: \(user.uid)")
+          Text("email: \(user.email ?? "No Email")")
+          Text("user_name: \(user.userName ?? "No Name")")
+          Text("created: \(user.created ?? Date())")
+        }
       } header: {
         Text("프로필")
       }

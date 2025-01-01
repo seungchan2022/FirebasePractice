@@ -15,18 +15,16 @@ extension AuthEntity.Me {
 
     public init(
       uid: String,
-      email: String?,
-      userName: String?,
-      photoURL: String?,
-      created: Date?,
-      isPremium: Bool?)
+      email: String? = "",
+      userName: String? = "",
+      photoURL: String? = "",
+      created: Date? = .none)
     {
       self.uid = uid
       self.email = email
       self.userName = userName
       self.photoURL = photoURL
       self.created = created
-      self.isPremium = isPremium
     }
 
     // MARK: Public
@@ -36,7 +34,6 @@ extension AuthEntity.Me {
     public let userName: String?
     public let photoURL: String?
     public let created: Date?
-    public let isPremium: Bool?
 
     // MARK: Private
 
@@ -46,7 +43,7 @@ extension AuthEntity.Me {
       case userName = "user_name"
       case photoURL
       case created
-      case isPremium = "is_premium"
+
     }
   }
 }

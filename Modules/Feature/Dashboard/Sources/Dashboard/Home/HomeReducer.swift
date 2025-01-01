@@ -29,8 +29,9 @@ struct HomeReducer {
       case .fetchUser(let result):
         state.fetchUser.isLoading = false
         switch result {
-        case .success(let item):
-          state.user = item
+        case .success(let user):
+          state.fetchUser.value = user
+          state.user = user
           return .none
 
         case .failure(let error):
@@ -228,7 +229,7 @@ extension HomeReducer {
 
     let id: UUID
 
-    var user: AuthEntity.Me.Response = .init(uid: "", email: "", userName: "", photoURL: "", created: .none, isPremium: false)
+    var user: AuthEntity.Me.Response? = .none
 
     var providerList: [AuthEntity.ProviderOption.Option] = []
     var fetchProvider: FetchState.Data<[AuthEntity.ProviderOption.Option]?> = .init(isLoading: false, value: .none)

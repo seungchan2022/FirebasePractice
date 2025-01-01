@@ -16,7 +16,7 @@ extension HomeSideEffect {
     {
       .run { send in
         do {
-          let response = try useCaseGroup.authUseCase.me()
+          let response = try await useCaseGroup.authUseCase.me()
           await send(HomeReducer.Action.fetchUser(.success(response)))
         } catch {
           await send(HomeReducer.Action.fetchUser(.failure(.other(error))))
