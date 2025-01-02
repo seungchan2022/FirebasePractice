@@ -38,6 +38,24 @@ struct HomeReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .getDBUser:
+        state.fetchDBUser.isLoading = true
+        return sideEffect
+          .getDBUser()
+          .cancellable(pageID: state.id, id: CancelID.requestDBUser, cancelInFlight: true)
+
+      case .fetchDBUser(let result):
+        state.fetchDBUser.isLoading = false
+        switch result {
+        case .success(let user):
+          state.fetchDBUser.value = user
+          state.dbUser = user
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .onTapSignOut:
         state.fetchSignOut.isLoading = false
         return sideEffect
@@ -230,6 +248,7 @@ extension HomeReducer {
     let id: UUID
 
     var user: AuthEntity.Me.Response? = .none
+    var dbUser: UserEntity.User.Response? = .none
 
     var providerList: [AuthEntity.ProviderOption.Option] = []
     var fetchProvider: FetchState.Data<[AuthEntity.ProviderOption.Option]?> = .init(isLoading: false, value: .none)
@@ -256,6 +275,8 @@ extension HomeReducer {
     var fetchDeleteGoogleUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchDeleteAppleUser: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
+    var fetchDBUser: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -264,6 +285,9 @@ extension HomeReducer {
 
     case getUser
     case fetchUser(Result<AuthEntity.Me.Response, CompositeErrorRepository>)
+
+    case getDBUser
+    case fetchDBUser(Result<UserEntity.User.Response, CompositeErrorRepository>)
 
     case onTapSignOut
     case fetchSignOut(Result<Bool, CompositeErrorRepository>)
@@ -304,5 +328,6 @@ extension HomeReducer {
     case requestDeleteGoogleUser
     case requestDeleteAppleUser
     case requestGetProvider
+    case requestDBUser
   }
 }

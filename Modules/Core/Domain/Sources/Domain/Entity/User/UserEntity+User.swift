@@ -1,24 +1,24 @@
 import Foundation
 
-// MARK: - AuthEntity.Me
+// MARK: - UserEntity.User
 
-extension AuthEntity {
-  public enum Me { }
+extension UserEntity {
+  public enum User { }
 }
 
-// MARK: - AuthEntity.Me.Response
+// MARK: - UserEntity.User.Response
 
-extension AuthEntity.Me {
+extension UserEntity.User {
   public struct Response: Equatable, Codable, Sendable {
 
     // MARK: Lifecycle
 
     public init(
       uid: String,
-      email: String? = "",
-      userName: String? = "",
-      photoURL: String? = "",
-      created: Date? = .none)
+      email: String?,
+      userName: String?,
+      photoURL: String?,
+      created: Date?)
     {
       self.uid = uid
       self.email = email
@@ -43,7 +43,6 @@ extension AuthEntity.Me {
       case userName = "user_name"
       case photoURL = "photo_url"
       case created
-
     }
   }
 }

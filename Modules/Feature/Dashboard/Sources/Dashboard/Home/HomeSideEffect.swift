@@ -16,10 +16,24 @@ extension HomeSideEffect {
     {
       .run { send in
         do {
-          let response = try await useCaseGroup.authUseCase.me()
+          let response = try useCaseGroup.authUseCase.me()
           await send(HomeReducer.Action.fetchUser(.success(response)))
         } catch {
           await send(HomeReducer.Action.fetchUser(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var getDBUser: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let user = try useCaseGroup.authUseCase.me()
+          let response = try await useCaseGroup.userUseCase.getUser(user.uid)
+          await send(HomeReducer.Action.fetchDBUser(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchDBUser(.failure(.other(error))))
         }
       }
     }

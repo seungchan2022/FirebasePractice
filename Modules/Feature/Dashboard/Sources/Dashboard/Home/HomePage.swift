@@ -11,7 +11,7 @@ struct HomePage {
 extension HomePage {
   @MainActor
   private var isLoading: Bool {
-    store.fetchUser.isLoading
+    store.fetchDBUser.isLoading
   }
 
   @MainActor
@@ -25,69 +25,71 @@ extension HomePage {
 extension HomePage: View {
   var body: some View {
     List {
-      Section {
-        if let user = store.user {
+      if let user = store.dbUser {
+        Section {
           Text("uid: \(user.uid)")
           Text("email: \(user.email ?? "No Email")")
           Text("user_name: \(user.userName ?? "No Name")")
           Text("created: \(user.created ?? Date())")
-        }
-      } header: {
-        Text("프로필")
-      }
+          Text("photoURL: \(user.photoURL ?? "No PhotoURL")")
 
-      if store.providerList.contains(.email) {
-        Section {
-          Button(action: {
-            store.currPasswordText = ""
-            store.newPasswordText = ""
-            store.isShowUpdatePassword = true
-          }) {
-            Text("비밀번호 변경")
+        } header: {
+          Text("프로필")
+        }
+
+        if store.providerList.contains(.email) {
+          Section {
+            Button(action: {
+              store.currPasswordText = ""
+              store.newPasswordText = ""
+              store.isShowUpdatePassword = true
+            }) {
+              Text("비밀번호 변경")
+            }
           }
         }
-      }
 
-      Section {
-        Button(action: { store.isShowSignOutAlert = true }) {
-          Text("로그아웃")
-        }
-      }
-
-      if store.providerList.contains(.email) {
         Section {
-          Button(role: .destructive, action: {
-            store.isShowDeleteUserAlert = true
-            store.passwordText = ""
-          }) {
-            Text("이메일 계정 탈퇴")
-          }
-
-          Button(role: .destructive, action: {
-            store.isShowDeleteKakaoUserAlert = true
-
-          }) {
-            Text("카카오 계정 탈퇴")
+          Button(action: { store.isShowSignOutAlert = true }) {
+            Text("로그아웃")
           }
         }
-      }
 
-      if store.providerList.contains(.google) {
-        Section {
-          Button(role: .destructive, action: {
-            store.isShowDeleteGoogleUserAlert = true
-          }) {
-            Text("구글 계정 탈퇴")
+        if store.providerList.contains(.email) {
+          Section {
+            Button(role: .destructive, action: {
+              store.isShowDeleteUserAlert = true
+              store.passwordText = ""
+            }) {
+              Text("이메일 계정 탈퇴")
+            }
+
+            Button(role: .destructive, action: {
+              store.isShowDeleteKakaoUserAlert = true
+
+            }) {
+              Text("카카오 계정 탈퇴")
+            }
           }
         }
-      }
 
-      if store.providerList.contains(.apple) {
-        Section {
-          Button(role: .destructive, action: {
-            store.isShowDeleteAppleUserAlert = true
-          }) {
-            Text("애플 계정 탈퇴")
+        if store.providerList.contains(.google) {
+          Section {
+            Button(role: .destructive, action: {
+              store.isShowDeleteGoogleUserAlert = true
+            }) {
+              Text("구글 계정 탈퇴")
+            }
+          }
+        }
+
+        if store.providerList.contains(.apple) {
+          Section {
+            Button(role: .destructive, action: {
+              store.isShowDeleteAppleUserAlert = true
+            }) {
+              Text("애플 계정 탈퇴")
+            }
           }
         }
       }
@@ -196,9 +198,8 @@ extension HomePage: View {
     } message: {
       Text("계정을 탈퇴 하려면, 확인 버튼을 눌러주세요.")
     }
-
     .onAppear {
-      store.send(.getUser)
+      store.send(.getDBUser)
       store.send(.getProvider)
     }
     .setRequestFlightView(isLoading: isLoading)
