@@ -130,6 +130,22 @@ extension HomeSideEffect {
     }
   }
 
+  var updateStatus: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let user = try useCaseGroup.authUseCase.me()
+          let dbUser = try await useCaseGroup.userUseCase.getUser(user.uid)
+          let response = try await useCaseGroup.userUseCase.updateUserStatus(dbUser)
+
+          await send(HomeReducer.Action.fetchUpdateStatus(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchUpdateStatus(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToSignIn: () -> Void {
     {
       navigator.replace(

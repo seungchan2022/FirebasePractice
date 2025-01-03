@@ -224,6 +224,24 @@ struct HomeReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapUpdateStatus:
+        state.fetchUpdateStatus.isLoading = true
+        return sideEffect
+          .updateStatus()
+          .cancellable(pageID: state.id, id: CancelID.requestUpdatStatus, cancelInFlight: true)
+
+      case .fetchUpdateStatus(let result):
+        state.fetchUpdateStatus.isLoading = false
+        switch result {
+        case .success(let user):
+          state.fetchDBUser.value = user
+          state.dbUser = user
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -277,6 +295,8 @@ extension HomeReducer {
 
     var fetchDBUser: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
 
+    var fetchUpdateStatus: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -310,6 +330,9 @@ extension HomeReducer {
     case getProvider
     case fetchProvider(Result<[AuthEntity.ProviderOption.Option], CompositeErrorRepository>)
 
+    case onTapUpdateStatus
+    case fetchUpdateStatus(Result<UserEntity.User.Response, CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 
@@ -329,5 +352,6 @@ extension HomeReducer {
     case requestDeleteAppleUser
     case requestGetProvider
     case requestDBUser
+    case requestUpdatStatus
   }
 }

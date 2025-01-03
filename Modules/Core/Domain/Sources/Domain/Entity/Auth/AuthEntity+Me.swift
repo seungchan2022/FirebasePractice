@@ -15,9 +15,9 @@ extension AuthEntity.Me {
 
     public init(
       uid: String,
-      email: String? = "",
-      userName: String? = "",
-      photoURL: String? = "",
+      email: String? = .none,
+      userName: String? = .none,
+      photoURL: String? = .none,
       created: Date? = .none)
     {
       self.uid = uid

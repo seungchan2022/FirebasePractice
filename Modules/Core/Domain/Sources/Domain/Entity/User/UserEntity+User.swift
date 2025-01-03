@@ -15,16 +15,18 @@ extension UserEntity.User {
 
     public init(
       uid: String,
-      email: String?,
-      userName: String?,
-      photoURL: String?,
-      created: Date?)
+      email: String? = .none,
+      userName: String? = .none,
+      photoURL: String? = .none,
+      created: Date? = .none,
+      isPremium: Bool? = .none)
     {
       self.uid = uid
       self.email = email
       self.userName = userName
       self.photoURL = photoURL
       self.created = created
+      self.isPremium = isPremium
     }
 
     // MARK: Public
@@ -34,6 +36,7 @@ extension UserEntity.User {
     public let userName: String?
     public let photoURL: String?
     public let created: Date?
+    public var isPremium: Bool?
 
     // MARK: Private
 
@@ -43,6 +46,7 @@ extension UserEntity.User {
       case userName = "user_name"
       case photoURL = "photo_url"
       case created
+      case isPremium = "is_premium"
     }
   }
 }

@@ -12,6 +12,7 @@ extension HomePage {
   @MainActor
   private var isLoading: Bool {
     store.fetchDBUser.isLoading
+      || store.fetchUpdateStatus.isLoading
   }
 
   @MainActor
@@ -32,6 +33,10 @@ extension HomePage: View {
           Text("user_name: \(user.userName ?? "No Name")")
           Text("created: \(user.created ?? Date())")
           Text("photoURL: \(user.photoURL ?? "No PhotoURL")")
+
+          Button(action: { store.send(.onTapUpdateStatus) }) {
+            Text("User is Premium: \((user.isPremium ?? false).description.capitalized)")
+          }
 
         } header: {
           Text("프로필")
