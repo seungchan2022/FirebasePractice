@@ -146,6 +146,35 @@ extension HomeSideEffect {
     }
   }
 
+  var addWishItem: (String) -> Effect<HomeReducer.Action> {
+    { item in
+      .run { send in
+        do {
+          let user = try useCaseGroup.authUseCase.me()
+          let response = try await useCaseGroup.userUseCase.addWishItem(user.uid, item)
+          await send(HomeReducer.Action.fetchWishItem(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchWishItem(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var removeWishItem: (String) -> Effect<HomeReducer.Action> {
+    { item in
+      .run { send in
+        do {
+          let user = try useCaseGroup.authUseCase.me()
+          let response = try await useCaseGroup.userUseCase.removeWishItem(user.uid, item)
+          await send(HomeReducer.Action.fetchRemoveItem(.success(response)))
+
+        } catch {
+          await send(HomeReducer.Action.fetchRemoveItem(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToSignIn: () -> Void {
     {
       navigator.replace(

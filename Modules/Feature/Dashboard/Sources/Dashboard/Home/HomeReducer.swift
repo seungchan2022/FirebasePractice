@@ -234,7 +234,43 @@ struct HomeReducer {
         state.fetchUpdateStatus.isLoading = false
         switch result {
         case .success(let user):
-          state.fetchDBUser.value = user
+          state.fetchUpdateStatus.value = user
+          state.dbUser = user
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .onTapWishItem(let item):
+        state.fetchWishItem.isLoading = true
+        return sideEffect
+          .addWishItem(item)
+          .cancellable(pageID: state.id, id: CancelID.requestAddWishItem, cancelInFlight: true)
+
+      case .fetchWishItem(let result):
+        state.fetchWishItem.isLoading = false
+        switch result {
+        case .success(let user):
+          state.fetchWishItem.value = user
+          state.dbUser = user
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .onTapRemoveItem(let item):
+        state.fetchRemoveItem.isLoading = true
+        return sideEffect
+          .removeWishItem(item)
+          .cancellable(pageID: state.id, id: CancelID.requestRemoveWishItem, cancelInFlight: true)
+
+      case .fetchRemoveItem(let result):
+        state.fetchRemoveItem.isLoading = false
+        switch result {
+        case .success(let user):
+          state.fetchRemoveItem.value = user
           state.dbUser = user
           return .none
 
@@ -268,6 +304,8 @@ extension HomeReducer {
     var user: AuthEntity.Me.Response? = .none
     var dbUser: UserEntity.User.Response? = .none
 
+    let wishList: [String] = ["영화", "스포츠", "독서"]
+
     var providerList: [AuthEntity.ProviderOption.Option] = []
     var fetchProvider: FetchState.Data<[AuthEntity.ProviderOption.Option]?> = .init(isLoading: false, value: .none)
 
@@ -296,6 +334,9 @@ extension HomeReducer {
     var fetchDBUser: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
 
     var fetchUpdateStatus: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
+
+    var fetchWishItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
+    var fetchRemoveItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
 
   }
 
@@ -333,6 +374,12 @@ extension HomeReducer {
     case onTapUpdateStatus
     case fetchUpdateStatus(Result<UserEntity.User.Response, CompositeErrorRepository>)
 
+    case onTapWishItem(String)
+    case fetchWishItem(Result<UserEntity.User.Response, CompositeErrorRepository>)
+
+    case onTapRemoveItem(String)
+    case fetchRemoveItem(Result<UserEntity.User.Response, CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 
@@ -353,5 +400,7 @@ extension HomeReducer {
     case requestGetProvider
     case requestDBUser
     case requestUpdatStatus
+    case requestAddWishItem
+    case requestRemoveWishItem
   }
 }

@@ -19,7 +19,8 @@ extension UserEntity.User {
       userName: String? = .none,
       photoURL: String? = .none,
       created: Date? = .none,
-      isPremium: Bool? = .none)
+      isPremium: Bool? = .none,
+      wishList: [String]? = .none)
     {
       self.uid = uid
       self.email = email
@@ -27,6 +28,7 @@ extension UserEntity.User {
       self.photoURL = photoURL
       self.created = created
       self.isPremium = isPremium
+      self.wishList = wishList
     }
 
     // MARK: Public
@@ -36,7 +38,8 @@ extension UserEntity.User {
     public let userName: String?
     public let photoURL: String?
     public let created: Date?
-    public var isPremium: Bool?
+    public let isPremium: Bool?
+    public let wishList: [String]?
 
     // MARK: Private
 
@@ -47,6 +50,7 @@ extension UserEntity.User {
       case photoURL = "photo_url"
       case created
       case isPremium = "is_premium"
+      case wishList = "wish_list"
     }
   }
 }

@@ -19,6 +19,14 @@ extension HomePage {
   private var isActiveUpdatePassword: Bool {
     !store.currPasswordText.isEmpty && !store.newPasswordText.isEmpty
   }
+
+  @MainActor
+  private var isSelectedItem: (String) -> Bool {
+    { item in
+      store.dbUser?.wishList?.contains(item) == true
+    }
+  }
+
 }
 
 // MARK: View
@@ -37,9 +45,31 @@ extension HomePage: View {
           Button(action: { store.send(.onTapUpdateStatus) }) {
             Text("User is Premium: \((user.isPremium ?? false).description.capitalized)")
           }
-
         } header: {
           Text("프로필")
+        }
+
+        Section {
+          HStack {
+            ForEach(store.wishList, id: \.self) { item in
+              Button(action: {
+                if isSelectedItem(item) {
+                  store.send(.onTapRemoveItem(item))
+                } else {
+                  store.send(.onTapWishItem(item))
+                }
+              }) {
+                Text(item)
+              }
+              .font(.headline)
+              .buttonStyle(.borderedProminent)
+              .tint(isSelectedItem(item) ? Color.red : Color.green)
+            }
+          }
+
+          Text("WishList \((user.wishList ?? []).joined(separator: ", "))")
+        } header: {
+          Text("WishList")
         }
 
         if store.providerList.contains(.email) {

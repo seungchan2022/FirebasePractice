@@ -34,6 +34,28 @@ extension UserUseCasePlatform: UserUseCase {
       }
     }
   }
+
+  public var addWishItem: (String, String) async throws -> UserEntity.User.Response {
+    { uid, item in
+      do {
+        try await addWishItem(uid: uid, item: item)
+        return try await getDBUser(uid: uid)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var removeWishItem: (String, String) async throws -> UserEntity.User.Response {
+    { uid, item in
+      do {
+        try await removeWishItem(uid: uid, item: item)
+        return try await getDBUser(uid: uid)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension UserUseCasePlatform {
@@ -45,6 +67,22 @@ extension UserUseCasePlatform {
   func updateStatus(uid: String, isPremium: Bool) async throws {
     let data: [String: Any] = [
       "is_premium" : isPremium,
+    ]
+
+    try await Firestore.firestore().collection("users").document(uid).updateData(data)
+  }
+
+  func addWishItem(uid: String, item: String) async throws {
+    let data: [String: Any] = [
+      "wish_list": FieldValue.arrayUnion([item]),
+    ]
+
+    try await Firestore.firestore().collection("users").document(uid).updateData(data)
+  }
+
+  func removeWishItem(uid: String, item: String) async throws {
+    let data: [String: Any] = [
+      "wish_list": FieldValue.arrayRemove([item]),
     ]
 
     try await Firestore.firestore().collection("users").document(uid).updateData(data)
