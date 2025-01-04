@@ -24,26 +24,16 @@ extension UserUseCasePlatform: UserUseCase {
     }
   }
 
-  public var updateUserStatus: (UserEntity.User.Response) async throws -> UserEntity.User.Response {
-    { user in
-      let currentValue = user.isPremium ?? false
-      let updateUser = UserEntity.User.Response(
-        uid: user.uid,
-        email: user.email,
-        userName: user.userName,
-        photoURL: user.photoURL,
-        created: user.created,
-        isPremium: !currentValue)
+  public var updateUserStatus: (String, Bool) async throws -> UserEntity.User.Response {
+    { uid, isPremium in
       do {
-        try await updateStatus(uid: updateUser.uid, isPremium: !currentValue)
-        return updateUser
-
+        try await updateStatus(uid: uid, isPremium: isPremium)
+        return try await getDBUser(uid: uid)
       } catch {
         throw CompositeErrorRepository.other(error)
       }
     }
   }
-
 }
 
 extension UserUseCasePlatform {
