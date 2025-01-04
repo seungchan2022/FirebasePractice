@@ -72,6 +72,20 @@ extension HomePage: View {
           Text("WishList")
         }
 
+        Section {
+          Button(action: {
+            if user.movie == .none {
+              store.send(.onTapAddMovieItem)
+            } else {
+              store.send(.onTapRemoveMovieItem)
+            }
+          }) {
+            Text("Favorite Movie \(user.movie?.title ?? "")")
+          }
+        } header: {
+          Text("Favorite Movie")
+        }
+
         if store.providerList.contains(.email) {
           Section {
             Button(action: {

@@ -175,6 +175,37 @@ extension HomeSideEffect {
     }
   }
 
+  var addMovieItem: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let user = try useCaseGroup.authUseCase.me()
+          let item = UserEntity.Movie.Item(id: "1", title: "joker", isPopular: true)
+          let response = try await useCaseGroup.userUseCase.addMovie(user.uid, item)
+          await send(HomeReducer.Action.fetchAddMovieItem(.success(response)))
+        } catch {
+          await send(HomeReducer.Action.fetchAddMovieItem(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var removeMovieItem: () -> Effect<HomeReducer.Action> {
+    {
+      .run { send in
+        do {
+          let user = try useCaseGroup.authUseCase.me()
+          let response = try await useCaseGroup.userUseCase.removeMovieItem(user.uid)
+
+          await send(HomeReducer.Action.fetchRemoveItem(.success(response)))
+
+        } catch {
+          await send(HomeReducer.Action.fetchRemoveItem(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToSignIn: () -> Void {
     {
       navigator.replace(

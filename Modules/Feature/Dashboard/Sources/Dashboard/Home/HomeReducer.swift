@@ -278,6 +278,42 @@ struct HomeReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapAddMovieItem:
+        state.fetchAddMovidItem.isLoading = true
+        return sideEffect
+          .addMovieItem()
+          .cancellable(pageID: state.id, id: CancelID.requestAddMovieItem, cancelInFlight: true)
+
+      case .fetchAddMovieItem(let result):
+        state.fetchAddMovidItem.isLoading = false
+        switch result {
+        case .success(let user):
+          state.fetchAddMovidItem.value = user
+          state.dbUser = user
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .onTapRemoveMovieItem:
+        state.fetchRemoveMovieItem.isLoading = true
+        return sideEffect
+          .removeMovieItem()
+          .cancellable(pageID: state.id, id: CancelID.requestRemoveMovieItem, cancelInFlight: true)
+
+      case .fetchRemoveMovieItem(let result):
+        state.fetchRemoveMovieItem.isLoading = false
+        switch result {
+        case .success(let user):
+          state.fetchRemoveMovieItem.value = user
+          state.dbUser = user
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -338,6 +374,9 @@ extension HomeReducer {
     var fetchWishItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
     var fetchRemoveItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
 
+    var fetchAddMovidItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
+    var fetchRemoveMovieItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -380,6 +419,12 @@ extension HomeReducer {
     case onTapRemoveItem(String)
     case fetchRemoveItem(Result<UserEntity.User.Response, CompositeErrorRepository>)
 
+    case onTapAddMovieItem
+    case fetchAddMovieItem(Result<UserEntity.User.Response, CompositeErrorRepository>)
+
+    case onTapRemoveMovieItem
+    case fetchRemoveMovieItem(Result<UserEntity.User.Response, CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 
@@ -402,5 +447,7 @@ extension HomeReducer {
     case requestUpdatStatus
     case requestAddWishItem
     case requestRemoveWishItem
+    case requestAddMovieItem
+    case requestRemoveMovieItem
   }
 }

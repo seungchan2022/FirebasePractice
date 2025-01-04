@@ -56,6 +56,28 @@ extension UserUseCasePlatform: UserUseCase {
       }
     }
   }
+
+  public var addMovie: (String, UserEntity.Movie.Item) async throws -> UserEntity.User.Response {
+    { uid, item in
+      do {
+        try await addMovieItem(uid: uid, item: item)
+        return try await getDBUser(uid: uid)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var removeMovieItem: (String) async throws -> UserEntity.User.Response {
+    { uid in
+      do {
+        try await removeMovieItem(uid: uid)
+        return try await getDBUser(uid: uid)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension UserUseCasePlatform {
@@ -86,6 +108,26 @@ extension UserUseCasePlatform {
     ]
 
     try await Firestore.firestore().collection("users").document(uid).updateData(data)
+  }
+
+  func addMovieItem(uid: String, item: UserEntity.Movie.Item) async throws {
+    let encoder = Firestore.Encoder()
+
+    guard let data = try? encoder.encode(item) else { throw CompositeErrorRepository.invalidTypeCasting }
+
+    let dict: [String: Any] = [
+      "movie": data,
+    ]
+
+    try await Firestore.firestore().collection("users").document(uid).updateData(dict)
+  }
+
+  func removeMovieItem(uid: String) async throws {
+    let data: [String: Any?] = [
+      "movie": .none,
+    ]
+
+    try await Firestore.firestore().collection("users").document(uid).updateData(data as [AnyHashable: Any])
   }
 
 }
