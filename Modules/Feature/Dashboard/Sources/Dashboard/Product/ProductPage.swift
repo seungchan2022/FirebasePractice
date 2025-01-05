@@ -27,12 +27,10 @@ extension ProductPage: View {
           .frame(width: 75, height: 75)
           .background(
             RoundedRectangle(cornerRadius: 10)
-              .fill(Color.white)
-          )
+              .fill(Color.white))
           .overlay(
             RoundedRectangle(cornerRadius: 10)
-              .stroke(Color.black, lineWidth: 0.2)
-          )
+              .stroke(Color.black, lineWidth: 0.2))
           .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
 
           VStack(alignment: .leading, spacing: 4) {

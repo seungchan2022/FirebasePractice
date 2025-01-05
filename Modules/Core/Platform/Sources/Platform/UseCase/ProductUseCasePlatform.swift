@@ -49,22 +49,23 @@ extension ProductUseCasePlatform: ProductUseCase {
 
 extension ProductUseCasePlatform {
 
-  func uploadItem(item: ProductEntity.Product.Item) async throws {
+  private func uploadItem(item: ProductEntity.Product.Item) async throws {
     let ref = Firestore.firestore().collection("products").document("\(item.id)")
 
     try ref.setData(from: item, merge: false)
   }
 
-  func getAllItemList() async throws -> [ProductEntity.Product.Item] {
-    let snapshot = try await Firestore.firestore().collection("products").getDocuments()
+  private func getAllItemList() async throws -> [ProductEntity.Product.Item] {
+    try await Firestore.firestore().collection("products").getDocuments(as: ProductEntity.Product.Item.self)
+  }
+}
 
-    var itemList: [ProductEntity.Product.Item] = []
+extension Query {
+  fileprivate func getDocuments<T>(as _: T.Type) async throws -> [T] where T: Codable {
+    let snapshot = try await getDocuments()
 
-    for document in snapshot.documents {
-      let item = try document.data(as: ProductEntity.Product.Item.self)
-      itemList.append(item)
+    return try snapshot.documents.map {
+      try $0.data(as: T.self)
     }
-
-    return itemList
   }
 }
