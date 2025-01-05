@@ -35,6 +35,16 @@ extension ProductUseCasePlatform: ProductUseCase {
     }
   }
 
+  public var getItemList: () async throws -> [ProductEntity.Product.Item] {
+    {
+      do {
+        return try await getAllItemList()
+      } catch {
+        throw CompositeErrorRepository.invalidTypeCasting
+      }
+    }
+  }
+
 }
 
 extension ProductUseCasePlatform {
@@ -43,5 +53,18 @@ extension ProductUseCasePlatform {
     let ref = Firestore.firestore().collection("products").document("\(item.id)")
 
     try ref.setData(from: item, merge: false)
+  }
+
+  func getAllItemList() async throws -> [ProductEntity.Product.Item] {
+    let snapshot = try await Firestore.firestore().collection("products").getDocuments()
+
+    var itemList: [ProductEntity.Product.Item] = []
+
+    for document in snapshot.documents {
+      let item = try document.data(as: ProductEntity.Product.Item.self)
+      itemList.append(item)
+    }
+
+    return itemList
   }
 }

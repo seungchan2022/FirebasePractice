@@ -36,6 +36,24 @@ struct ProductReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .getItemList:
+        state.fetchItemList.isLoading = true
+        return sideEffect
+          .getItemList()
+          .cancellable(pageID: state.id, id: CancelID.requestItemList, cancelInFlight: true)
+
+      case .fetchItemList(let result):
+        state.fetchItemList.isLoading = false
+        switch result {
+        case .success(let itemList):
+          state.fetchItemList.value = itemList
+          state.itemList = itemList
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -49,11 +67,15 @@ extension ProductReducer {
   struct State: Equatable, Identifiable, Sendable {
     let id: UUID
 
+    var itemList: [ProductEntity.Product.Item] = []
+
     init(id: UUID = UUID()) {
       self.id = id
     }
 
     var fetchDownlooadItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+
+    var fetchItemList: FetchState.Data<[ProductEntity.Product.Item]?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -62,6 +84,9 @@ extension ProductReducer {
 
     case downloadItem
     case fetchDownlooadItem(Result<Bool, CompositeErrorRepository>)
+
+    case getItemList
+    case fetchItemList(Result<[ProductEntity.Product.Item], CompositeErrorRepository>)
 
     case throwError(CompositeErrorRepository)
   }
@@ -73,5 +98,6 @@ extension ProductReducer {
   enum CancelID: Equatable, CaseIterable {
     case teardown
     case requestDownloadItem
+    case requestItemList
   }
 }

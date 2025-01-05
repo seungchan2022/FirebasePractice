@@ -23,4 +23,17 @@ extension ProductSideEffect {
       }
     }
   }
+
+  var getItemList: () -> Effect<ProductReducer.Action> {
+    {
+      .run { send in
+        do {
+          let itemList = try await useCaseGroup.productUseCase.getItemList()
+          await send(ProductReducer.Action.fetchItemList(.success(itemList)))
+        } catch {
+          await send(ProductReducer.Action.fetchItemList(.failure(.other(error))))
+        }
+      }
+    }
+  }
 }
