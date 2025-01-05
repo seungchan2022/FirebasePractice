@@ -13,5 +13,6 @@ extension Link.Dashboard {
     case home
     case signIn
     case signUp
+    case product
   }
 }

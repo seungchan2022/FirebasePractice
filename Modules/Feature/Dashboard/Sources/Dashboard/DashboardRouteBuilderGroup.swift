@@ -14,6 +14,7 @@ extension DashboardRouteBuilderGroup {
       HomeRouteBuilder.generate(),
       SignInRouteBuilder.generate(),
       SignUpRouteBuilder.generate(),
+      ProductRouteBuilder.generate(),
     ]
   }
 }

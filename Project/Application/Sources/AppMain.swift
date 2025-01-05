@@ -17,7 +17,7 @@ extension AppMain: View {
       linkNavigator: viewModel.linkNavigator,
       item: .init(
         path: Auth.auth().currentUser != .none
-          ? Link.Dashboard.Path.home.rawValue
+          ? Link.Dashboard.Path.product.rawValue
           : Link.Dashboard.Path.signIn.rawValue,
         items: .none),
       prefersLargeTitles: true)

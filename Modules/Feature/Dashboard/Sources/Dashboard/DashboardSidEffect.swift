@@ -6,4 +6,5 @@ public protocol DashboardSidEffect: Sendable {
   var toastViewModel: ToastViewActionType { get }
   var authUseCase: AuthUseCase { get }
   var userUseCase: UserUseCase { get }
+  var productUseCase: ProductUseCase { get }
 }

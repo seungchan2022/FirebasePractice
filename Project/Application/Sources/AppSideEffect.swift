@@ -11,6 +11,7 @@ struct AppSideEffect: DependencyType, DashboardSidEffect {
   let toastViewModel: ToastViewActionType
   let authUseCase: AuthUseCase
   let userUseCase: UserUseCase
+  let productUseCase: ProductUseCase
 }
 
 extension AppSideEffect {
@@ -18,6 +19,7 @@ extension AppSideEffect {
     .init(
       toastViewModel: ToastViewModel(),
       authUseCase: AuthUseCasePlatform(),
-      userUseCase: UserUseCasePlatform())
+      userUseCase: UserUseCasePlatform(),
+      productUseCase: ProductUseCasePlatform())
   }
 }
