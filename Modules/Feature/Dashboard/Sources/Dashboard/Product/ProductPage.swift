@@ -8,6 +8,25 @@ struct ProductPage {
   @Bindable var store: StoreOf<ProductReducer>
 }
 
+extension ProductPage {
+  @MainActor
+  private func optionSelected(option: FilterOption) async throws {
+    store.selectedOption = option
+    store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.category))
+  }
+
+  @MainActor
+  private func categorySelected(option: CategoryOption) async throws {
+    store.selectedCategory = option
+    store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.category))
+  }
+
+  @MainActor
+  private func getProducts() {
+    store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.category))
+  }
+}
+
 // MARK: View
 
 extension ProductPage: View {
@@ -40,19 +59,50 @@ extension ProductPage: View {
 
             Text(item.description ?? "")
               .lineLimit(1)
-            Text(item.category ?? "")
 
-            Text("\(item.price ?? .zero)")
-            Text("\(item.rating ?? .zero)")
-            Text(item.tagList?.joined(separator: ", ") ?? "")
+            Text("Category: \(item.category ?? "")")
+
+            Text("Price: $ \((item.price ?? .zero).formatted(.number.precision(.fractionLength(2))))")
+            Text("Rating: \((item.rating ?? .zero).formatted(.number.precision(.fractionLength(2))))")
+
+            Text("TagList: \(item.tagList?.joined(separator: ", ") ?? "")")
           }
           .font(.callout)
           .foregroundStyle(.secondary)
         }
       }
     }
+    .toolbar {
+      ToolbarItem(placement: .topBarLeading) {
+        Menu("Filter: \(store.selectedOption?.rawValue ?? "NONE")") {
+          ForEach(FilterOption.allCases, id: \.self) { option in
+            Button(action: {
+              Task {
+                try? await optionSelected(option: option)
+              }
+            }) {
+              Text(option.rawValue)
+            }
+          }
+        }
+      }
+
+      ToolbarItem(placement: .topBarTrailing) {
+        Menu("Category: \(store.selectedCategory?.rawValue ?? "NONE")") {
+          ForEach(CategoryOption.allCases, id: \.self) { option in
+            Button(action: {
+              Task {
+                try? await categorySelected(option: option)
+              }
+            }) {
+              Text(option.rawValue)
+            }
+          }
+        }
+      }
+    }
     .onAppear {
-      store.send(.getItemList)
+      store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.rawValue))
     }
   }
 }

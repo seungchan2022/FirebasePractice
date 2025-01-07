@@ -38,13 +38,47 @@ extension ProductUseCasePlatform: ProductUseCase {
   public var getItemList: () async throws -> [ProductEntity.Product.Item] {
     {
       do {
-        return try await getAllItemList()
+        return try await getAllItem()
       } catch {
         throw CompositeErrorRepository.invalidTypeCasting
       }
     }
   }
 
+  public var getItemListSortedByPrice: (Bool) async throws -> [ProductEntity.Product.Item] {
+    { descending in
+      do {
+        return try await sortedByPrice(descending: descending)
+      } catch {
+        throw CompositeErrorRepository.invalidTypeCasting
+      }
+    }
+  }
+
+  public var getItemListForCategory: (String) async throws -> [ProductEntity.Product.Item] {
+    { category in
+      do {
+        return try await sortedByCategory(category: category)
+      } catch {
+        throw CompositeErrorRepository.invalidTypeCasting
+      }
+    }
+  }
+
+  public var getAllItemList: (Bool?, String?) async throws -> [ProductEntity.Product.Item] {
+    { descending, category in
+      switch (descending, category) {
+      case (let descending?, let category?):
+        try await sortedByPriceAndCategory(descending: descending, category: category)
+      case (let descending?, .none):
+        try await sortedByPrice(descending: descending)
+      case (.none, let category?):
+        try await sortedByCategory(category: category)
+      case (.none, .none):
+        try await getAllItem()
+      }
+    }
+  }
 }
 
 extension ProductUseCasePlatform {
@@ -55,8 +89,28 @@ extension ProductUseCasePlatform {
     try ref.setData(from: item, merge: false)
   }
 
-  private func getAllItemList() async throws -> [ProductEntity.Product.Item] {
-    try await Firestore.firestore().collection("products").getDocuments(as: ProductEntity.Product.Item.self)
+  private func getAllItem() async throws -> [ProductEntity.Product.Item] {
+    try await Firestore.firestore().collection("products")
+      .getDocuments(as: ProductEntity.Product.Item.self)
+  }
+
+  private func sortedByPrice(descending: Bool) async throws -> [ProductEntity.Product.Item] {
+    try await Firestore.firestore().collection("products")
+      .order(by: "price", descending: descending)
+      .getDocuments(as: ProductEntity.Product.Item.self)
+  }
+
+  private func sortedByCategory(category: String) async throws -> [ProductEntity.Product.Item] {
+    try await Firestore.firestore().collection("products")
+      .whereField("category", isEqualTo: category)
+      .getDocuments(as: ProductEntity.Product.Item.self)
+  }
+
+  private func sortedByPriceAndCategory(descending: Bool, category: String) async throws -> [ProductEntity.Product.Item] {
+    try await Firestore.firestore().collection("products")
+      .whereField("category", isEqualTo: category)
+      .order(by: "price", descending: descending)
+      .getDocuments(as: ProductEntity.Product.Item.self)
   }
 }
 
