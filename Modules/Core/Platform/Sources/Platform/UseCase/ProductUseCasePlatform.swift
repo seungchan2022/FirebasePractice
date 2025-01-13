@@ -79,6 +79,43 @@ extension ProductUseCasePlatform: ProductUseCase {
       }
     }
   }
+
+  public var getItemListByRating: (Int, Double?, Int?) async throws -> [ProductEntity.Product.Item] {
+    { limit, lastRating, lastId in
+
+      if let lastId {
+        try await Firestore.firestore().collection("products")
+          .order(by: "rating", descending: true)
+          .order(by: "id", descending: true)
+          .limit(to: limit)
+          .start(after: [lastRating ?? 999, lastId])
+          .getDocuments(as: ProductEntity.Product.Item.self)
+      } else {
+        try await Firestore.firestore().collection("products")
+          .order(by: "rating", descending: true)
+          .order(by: "id", descending: true)
+          .limit(to: limit)
+          .getDocuments(as: ProductEntity.Product.Item.self)
+      }
+    }
+  }
+
+  public var getProductList: (Bool?, String?, Int, ProductEntity.Product.Item?) async throws -> [ProductEntity.Product.Item] {
+    { descending, category, limit, item in
+
+      switch (descending, category) {
+      case (let descending?, let category?):
+        try await sortedProductByPriceAndCategory(descending: descending, category: category, limit: limit, lastItem: item)
+      case (let descending?, .none):
+        try await sortedProductByPrice(descending: descending, limit: limit, lastItem: item)
+      case (.none, let category?):
+        try await sortedProductByCategory(category: category, limit: limit, lastItem: item)
+      case (.none, .none):
+        try await getAllProduct(limit: limit, lastItem: item)
+      }
+    }
+  }
+
 }
 
 extension ProductUseCasePlatform {
@@ -111,6 +148,79 @@ extension ProductUseCasePlatform {
       .whereField("category", isEqualTo: category)
       .order(by: "price", descending: descending)
       .getDocuments(as: ProductEntity.Product.Item.self)
+  }
+
+  private func getAllProduct(limit: Int, lastItem: ProductEntity.Product.Item?) async throws -> [ProductEntity.Product.Item] {
+    let query = Firestore.firestore().collection("products")
+      .order(by: "id")
+      .limit(to: limit)
+
+    if let lastItem {
+      return try await query
+        .start(after: [lastItem.id])
+        .getDocuments(as: ProductEntity.Product.Item.self)
+    } else {
+      return try await query.getDocuments(as: ProductEntity.Product.Item.self)
+    }
+  }
+
+  private func sortedProductByPrice(
+    descending: Bool,
+    limit: Int,
+    lastItem: ProductEntity.Product.Item?) async throws -> [ProductEntity.Product.Item]
+  {
+    let query = Firestore.firestore().collection("products")
+      .order(by: "price", descending: descending)
+      .order(by: "id", descending: true)
+      .limit(to: limit)
+
+    if let lastItem {
+      return try await query
+        .start(after: [lastItem.price ?? .zero, lastItem.id])
+        .getDocuments(as: ProductEntity.Product.Item.self)
+    } else {
+      return try await query.getDocuments(as: ProductEntity.Product.Item.self)
+    }
+  }
+
+  private func sortedProductByCategory(
+    category: String,
+    limit: Int,
+    lastItem: ProductEntity.Product.Item?) async throws -> [ProductEntity.Product.Item]
+  {
+    let query = Firestore.firestore().collection("products")
+      .whereField("category", isEqualTo: category)
+      .order(by: "id", descending: true)
+      .limit(to: limit)
+
+    if let lastItem {
+      return try await query
+        .start(after: [lastItem.id])
+        .getDocuments(as: ProductEntity.Product.Item.self)
+    } else {
+      return try await query.getDocuments(as: ProductEntity.Product.Item.self)
+    }
+  }
+
+  private func sortedProductByPriceAndCategory(
+    descending: Bool,
+    category: String,
+    limit: Int,
+    lastItem: ProductEntity.Product.Item?) async throws -> [ProductEntity.Product.Item]
+  {
+    let query = Firestore.firestore().collection("products")
+      .whereField("category", isEqualTo: category)
+      .order(by: "price", descending: descending)
+      .order(by: "id", descending: true)
+      .limit(to: limit)
+
+    if let lastItem {
+      return try await query
+        .start(after: [lastItem.price ?? .zero, lastItem.id])
+        .getDocuments(as: ProductEntity.Product.Item.self)
+    } else {
+      return try await query.getDocuments(as: ProductEntity.Product.Item.self)
+    }
   }
 }
 

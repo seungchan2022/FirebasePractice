@@ -108,6 +108,43 @@ struct ProductReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .getItemListByRating(let limit, let lastRating, let lastId):
+        state.fetchItemListByRating.isLoading = true
+        return sideEffect
+          .getItemListByRating(limit, lastRating, lastId)
+          .cancellable(pageID: state.id, id: CancelID.requestItemListByRating, cancelInFlight: true)
+
+      case .fetchItemListByRating(let result):
+
+        state.fetchItemListByRating.isLoading = false
+        switch result {
+        case .success(let itemList):
+          state.fetchItemListByRating.value = itemList
+          state.itemList = state.itemList + itemList
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .getProductList(let descending, let category, let limit, let item):
+        state.fetchProductList.isLoading = true
+        return sideEffect
+          .getProductList(descending, category, limit, item)
+          .cancellable(pageID: state.id, id: CancelID.requestProductList, cancelInFlight: true)
+
+      case .fetchProductList(let result):
+        state.fetchProductList.isLoading = false
+        switch result {
+        case .success(let itemList):
+          state.fetchProductList.value = itemList
+          state.itemList = state.itemList.merge(itemList)
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -144,6 +181,10 @@ extension ProductReducer {
     var fetchItemListForCategory: FetchState.Data<[ProductEntity.Product.Item]?> = .init(isLoading: false, value: .none)
 
     var fetchAllItemList: FetchState.Data<[ProductEntity.Product.Item]?> = .init(isLoading: false, value: .none)
+
+    var fetchItemListByRating: FetchState.Data<[ProductEntity.Product.Item]?> = .init(isLoading: false, value: .none)
+
+    var fetchProductList: FetchState.Data<[ProductEntity.Product.Item]?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -165,6 +206,12 @@ extension ProductReducer {
     case getAllItemList(Bool?, String?)
     case fetchAllItemList(Result<[ProductEntity.Product.Item], CompositeErrorRepository>)
 
+    case getItemListByRating(Int, Double?, Int)
+    case fetchItemListByRating(Result<[ProductEntity.Product.Item],CompositeErrorRepository>)
+
+    case getProductList(Bool?, String?, Int, ProductEntity.Product.Item?)
+    case fetchProductList(Result<[ProductEntity.Product.Item], CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 }
@@ -179,6 +226,8 @@ extension ProductReducer {
     case requestItemListSortedByPrice
     case requestItemListForCategory
     case requestAllItemList
+    case requestItemListByRating
+    case requestProductList
   }
 }
 
@@ -217,5 +266,16 @@ enum CategoryOption: String, CaseIterable {
     case .beauty, .fragrances, .furniture, .groceries:
       rawValue
     }
+  }
+}
+
+extension [ProductEntity.Product.Item] {
+  fileprivate func merge(_ target: Self) -> Self {
+    let new = target.reduce(self) { curr, next in
+      guard !self.contains(where: { $0.id == next.id }) else { return curr }
+      return curr + [next]
+    }
+
+    return new
   }
 }

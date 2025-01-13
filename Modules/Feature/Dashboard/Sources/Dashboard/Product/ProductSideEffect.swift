@@ -1,5 +1,6 @@
 import Architecture
 import ComposableArchitecture
+import Domain
 import Foundation
 import LinkNavigator
 
@@ -71,6 +72,32 @@ extension ProductSideEffect {
           await send(ProductReducer.Action.fetchAllItemList(.success(itemList)))
         } catch {
           await send(ProductReducer.Action.fetchAllItemList(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var getItemListByRating: (Int, Double?, Int?) -> Effect<ProductReducer.Action> {
+    { limit, lastRating, lastId in
+      .run { send in
+        do {
+          let itemList = try await useCaseGroup.productUseCase.getItemListByRating(limit, lastRating, lastId)
+          await send(ProductReducer.Action.fetchItemListByRating(.success(itemList)))
+        } catch {
+          await send(ProductReducer.Action.fetchItemListByRating(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var getProductList: (Bool?, String?, Int, ProductEntity.Product.Item?) -> Effect<ProductReducer.Action> {
+    { descending, category, limit, item in
+      .run { send in
+        do {
+          let itemList = try await useCaseGroup.productUseCase.getProductList(descending, category, limit, item)
+          await send(ProductReducer.Action.fetchProductList(.success(itemList)))
+        } catch {
+          await send(ProductReducer.Action.fetchProductList(.failure(.other(error))))
         }
       }
     }

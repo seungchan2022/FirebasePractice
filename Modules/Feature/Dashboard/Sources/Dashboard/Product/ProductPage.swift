@@ -10,21 +10,34 @@ struct ProductPage {
 
 extension ProductPage {
   @MainActor
+  private var lastRating: Double? {
+    store.itemList.last?.rating
+  }
+
+  @MainActor
+  private var lastId: Int {
+    store.itemList.last?.id ?? .zero
+  }
+
+  @MainActor
   private func optionSelected(option: FilterOption) async throws {
     store.selectedOption = option
-    store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.category))
+    store.itemList = []
+    getProducts()
   }
 
   @MainActor
   private func categorySelected(option: CategoryOption) async throws {
     store.selectedCategory = option
-    store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.category))
+    store.itemList = []
+    getProducts()
   }
 
   @MainActor
   private func getProducts() {
-    store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.category))
+    store.send(.getProductList(store.selectedOption?.descending, store.selectedCategory?.category, 5, store.itemList.last))
   }
+
 }
 
 // MARK: View
@@ -52,6 +65,8 @@ extension ProductPage: View {
               .stroke(Color.black, lineWidth: 0.2))
           .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
 
+          Text("\(item.id)")
+
           VStack(alignment: .leading, spacing: 4) {
             Text(item.title ?? "")
               .font(.headline)
@@ -62,13 +77,18 @@ extension ProductPage: View {
 
             Text("Category: \(item.category ?? "")")
 
-            Text("Price: $ \((item.price ?? .zero).formatted(.number.precision(.fractionLength(2))))")
+            Text("Price: $\((item.price ?? .zero).formatted(.number.precision(.fractionLength(2))))")
             Text("Rating: \((item.rating ?? .zero).formatted(.number.precision(.fractionLength(2))))")
 
             Text("TagList: \(item.tagList?.joined(separator: ", ") ?? "")")
           }
           .font(.callout)
           .foregroundStyle(.secondary)
+        }
+        .onAppear {
+          guard let last = store.itemList.last, last.id == item.id else { return }
+          guard !store.fetchProductList.isLoading else { return }
+          getProducts()
         }
       }
     }
@@ -102,7 +122,7 @@ extension ProductPage: View {
       }
     }
     .onAppear {
-      store.send(.getAllItemList(store.selectedOption?.descending, store.selectedCategory?.rawValue))
+      getProducts()
     }
   }
 }
