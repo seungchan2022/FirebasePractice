@@ -13,14 +13,25 @@ struct AppMain {
 
 extension AppMain: View {
   var body: some View {
-    LinkNavigationView(
+    TabLinkNavigationView(
       linkNavigator: viewModel.linkNavigator,
-      item: .init(
-        path: Auth.auth().currentUser != .none
-          ? Link.Dashboard.Path.product.rawValue
-          : Link.Dashboard.Path.signIn.rawValue,
-        items: .none),
-      prefersLargeTitles: true)
-      .ignoresSafeArea()
+      isHiddenDefaultTabbar: false,
+      tabItemList: [
+        .init(
+          tag: .zero,
+          tabItem: .init(title: "Product", image: UIImage(systemName: "list.clipboard"), tag: .zero),
+          linkItem: .init(path: Link.Dashboard.Path.product.rawValue, items: .none),
+          prefersLargeTitles: true),
+        .init(
+          tag: 1,
+          tabItem: .init(title: "Profile", image: UIImage(systemName: "person"), tag: 1),
+          linkItem: .init(
+            path: Auth.auth().currentUser != .none ? Link.Dashboard.Path.home.rawValue : Link.Dashboard.Path.signIn.rawValue,
+            items: .none),
+          prefersLargeTitles: true)
+
+      ]
+    )
+    .ignoresSafeArea()
   }
 }

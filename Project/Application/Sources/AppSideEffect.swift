@@ -13,13 +13,3 @@ struct AppSideEffect: DependencyType, DashboardSidEffect {
   let userUseCase: UserUseCase
   let productUseCase: ProductUseCase
 }
-
-extension AppSideEffect {
-  static func generate() -> AppSideEffect {
-    .init(
-      toastViewModel: ToastViewModel(),
-      authUseCase: AuthUseCasePlatform(),
-      userUseCase: UserUseCasePlatform(),
-      productUseCase: ProductUseCasePlatform())
-  }
-}

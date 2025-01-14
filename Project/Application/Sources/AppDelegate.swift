@@ -7,10 +7,10 @@ import UIKit
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
-  let container: AppContainer = .init()
+  let container: AppContainer = .build()
 
   var dependency: AppSideEffect { container.dependency }
-  var navigator: SingleLinkNavigator { container.linkNavigayor }
+  var navigator: TabLinkNavigator { container.linkNavigayor }
 
   func application(
     _: UIApplication,
