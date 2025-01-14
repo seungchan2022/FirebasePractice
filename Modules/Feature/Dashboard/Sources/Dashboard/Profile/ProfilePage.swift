@@ -2,13 +2,13 @@ import ComposableArchitecture
 import DesignSystem
 import SwiftUI
 
-// MARK: - HomePage
+// MARK: - ProfilePage
 
-struct HomePage {
-  @Bindable var store: StoreOf<HomeReducer>
+struct ProfilePage {
+  @Bindable var store: StoreOf<ProfileReducer>
 }
 
-extension HomePage {
+extension ProfilePage {
   @MainActor
   private var isLoading: Bool {
     store.fetchDBUser.isLoading
@@ -31,7 +31,7 @@ extension HomePage {
 
 // MARK: View
 
-extension HomePage: View {
+extension ProfilePage: View {
   var body: some View {
     List {
       if let user = store.dbUser {

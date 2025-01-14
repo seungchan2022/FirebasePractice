@@ -11,10 +11,11 @@ extension DashboardRouteBuilderGroup {
   @MainActor
   public func release() -> [RouteBuilderOf<RootNavigator>] {
     [
-      HomeRouteBuilder.generate(),
+      ProfileRouteBuilder.generate(),
       SignInRouteBuilder.generate(),
       SignUpRouteBuilder.generate(),
       ProductRouteBuilder.generate(),
+      FavoriteRouteBuilder.generate(),
     ]
   }
 }

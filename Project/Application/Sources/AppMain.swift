@@ -24,14 +24,21 @@ extension AppMain: View {
           prefersLargeTitles: true),
         .init(
           tag: 1,
-          tabItem: .init(title: "Profile", image: UIImage(systemName: "person"), tag: 1),
+          tabItem: .init(title: "Favorite", image: UIImage(systemName: "star"), tag: 1),
           linkItem: .init(
-            path: Auth.auth().currentUser != .none ? Link.Dashboard.Path.home.rawValue : Link.Dashboard.Path.signIn.rawValue,
+            path: Link.Dashboard.Path.favorite.rawValue,
             items: .none),
-          prefersLargeTitles: true)
-
-      ]
-    )
-    .ignoresSafeArea()
+          prefersLargeTitles: true),
+        .init(
+          tag: 2,
+          tabItem: .init(title: "Profile", image: UIImage(systemName: "person"), tag: 2),
+          linkItem: .init(
+            path: Auth.auth().currentUser != .none
+              ? Link.Dashboard.Path.profile.rawValue
+              : Link.Dashboard.Path.signIn.rawValue,
+            items: .none),
+          prefersLargeTitles: true),
+      ])
+      .ignoresSafeArea()
   }
 }

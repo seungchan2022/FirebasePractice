@@ -1,20 +1,20 @@
 import Architecture
 import LinkNavigator
 
-struct HomeRouteBuilder<RootNavigator: RootNavigatorType> {
+struct ProfileRouteBuilder<RootNavigator: RootNavigatorType> {
   @MainActor
   static func generate() -> RouteBuilderOf<RootNavigator> {
-    let matchPath = Link.Dashboard.Path.home.rawValue
+    let matchPath = Link.Dashboard.Path.profile.rawValue
 
     return .init(matchPath: matchPath) { navigator, _, diContainer -> RouteViewController? in
       guard let env: DashboardSidEffect = diContainer.resolve() else { return .none }
 
       return WrappingController(matchPath: matchPath) {
-        HomePage(
+        ProfilePage(
           store: .init(
-            initialState: HomeReducer.State(),
+            initialState: ProfileReducer.State(),
             reducer: {
-              HomeReducer(
+              ProfileReducer(
                 sideEffect: .init(
                   useCaseGroup: env,
                   navigator: navigator))

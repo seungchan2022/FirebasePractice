@@ -1,23 +1,28 @@
+import Architecture
 import Foundation
 @preconcurrency import LinkNavigator
-import Architecture
 import Platform
+
+// MARK: - AppContainer
 
 @MainActor
 final class AppContainer {
 
   // MARK: Lifecycle
 
+  init(
+    dependency: AppSideEffect,
+    linkNavigayor: TabLinkNavigator)
+  {
+    self.dependency = dependency
+    self.linkNavigayor = linkNavigayor
+  }
+
   // MARK: Internal
 
   let dependency: AppSideEffect
   let linkNavigayor: TabLinkNavigator
 
-  init(dependency: AppSideEffect,
-       linkNavigayor: TabLinkNavigator) {
-    self.dependency = dependency
-    self.linkNavigayor = linkNavigayor
-  }
 }
 
 extension AppContainer {

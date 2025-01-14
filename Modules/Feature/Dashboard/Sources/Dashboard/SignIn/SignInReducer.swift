@@ -34,7 +34,7 @@ struct SignInReducer {
           switch status {
           case true:
             sideEffect.useCaseGroup.toastViewModel.send(message: "로그인 성공")
-            sideEffect.routeToHome()
+            sideEffect.routeToProfile()
 
           case false:
             sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "로그인 실패")
@@ -85,7 +85,7 @@ struct SignInReducer {
         case .success(let status):
           switch status {
           case true:
-            sideEffect.routeToHome()
+            sideEffect.routeToProfile()
             sideEffect.useCaseGroup.toastViewModel.send(message: "구글 로그인 성공")
 
           case false:
@@ -109,7 +109,7 @@ struct SignInReducer {
         case .success(let status):
           switch status {
           case true:
-            sideEffect.routeToHome()
+            sideEffect.routeToProfile()
             sideEffect.useCaseGroup.toastViewModel.send(message: "애플 로그인 성공")
 
           case false:
@@ -133,7 +133,7 @@ struct SignInReducer {
         case .success(let status):
           switch status {
           case true:
-            sideEffect.routeToHome()
+            sideEffect.routeToProfile()
             sideEffect.useCaseGroup.toastViewModel.send(message: "카카오 로그인 성공")
 
           case false:

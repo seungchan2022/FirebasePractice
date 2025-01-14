@@ -88,11 +88,11 @@ extension SignInSideEffect {
     }
   }
 
-  var routeToHome: () -> Void {
+  var routeToProfile: () -> Void {
     {
       navigator.replace(
         linkItem: .init(
-          path: Link.Dashboard.Path.home.rawValue,
+          path: Link.Dashboard.Path.profile.rawValue,
           items: .none),
         isAnimated: true)
     }

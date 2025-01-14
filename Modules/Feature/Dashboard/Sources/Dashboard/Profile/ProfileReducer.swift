@@ -3,11 +3,11 @@ import ComposableArchitecture
 import Domain
 import Foundation
 
-// MARK: - HomeReducer
+// MARK: - ProfileReducer
 
 @Reducer
-struct HomeReducer {
-  let sideEffect: HomeSideEffect
+struct ProfileReducer {
+  let sideEffect: ProfileSideEffect
 
   var body: some ReducerOf<Self> {
     BindingReducer()
@@ -323,7 +323,7 @@ struct HomeReducer {
 
 }
 
-extension HomeReducer {
+extension ProfileReducer {
   @ObservableState
   struct State: Equatable, Identifiable, Sendable {
 
@@ -430,9 +430,9 @@ extension HomeReducer {
 
 }
 
-// MARK: HomeReducer.CancelID
+// MARK: ProfileReducer.CancelID
 
-extension HomeReducer {
+extension ProfileReducer {
   enum CancelID: Equatable, CaseIterable {
     case teardown
     case requestUser

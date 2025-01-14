@@ -4,133 +4,133 @@ import Domain
 import Foundation
 import LinkNavigator
 
-// MARK: - HomeSideEffect
+// MARK: - ProfileSideEffect
 
-struct HomeSideEffect {
+struct ProfileSideEffect {
   let useCaseGroup: DashboardSidEffect
   let navigator: RootNavigatorType
 }
 
-extension HomeSideEffect {
-  var getUser: () -> Effect<HomeReducer.Action> {
+extension ProfileSideEffect {
+  var getUser: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let response = try useCaseGroup.authUseCase.me()
-          await send(HomeReducer.Action.fetchUser(.success(response)))
+          await send(ProfileReducer.Action.fetchUser(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchUser(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchUser(.failure(.other(error))))
         }
       }
     }
   }
 
-  var getDBUser: () -> Effect<HomeReducer.Action> {
+  var getDBUser: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let user = try useCaseGroup.authUseCase.me()
           let response = try await useCaseGroup.userUseCase.getUser(user.uid)
-          await send(HomeReducer.Action.fetchDBUser(.success(response)))
+          await send(ProfileReducer.Action.fetchDBUser(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchDBUser(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchDBUser(.failure(.other(error))))
         }
       }
     }
   }
 
-  var signOut: () -> Effect<HomeReducer.Action> {
+  var signOut: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let response = try useCaseGroup.authUseCase.signOut()
-          await send(HomeReducer.Action.fetchSignOut(.success(response)))
+          await send(ProfileReducer.Action.fetchSignOut(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchSignOut(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchSignOut(.failure(.other(error))))
         }
       }
     }
   }
 
-  var updatePassword: (String, String) -> Effect<HomeReducer.Action> {
+  var updatePassword: (String, String) -> Effect<ProfileReducer.Action> {
     { currPassword, newPassword in
       .run { send in
         do {
           let response = try await useCaseGroup.authUseCase.updatePassword(currPassword, newPassword)
-          await send(HomeReducer.Action.fetchUpdatePassword(.success(response)))
+          await send(ProfileReducer.Action.fetchUpdatePassword(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchUpdatePassword(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchUpdatePassword(.failure(.other(error))))
         }
       }
     }
   }
 
-  var deleteUser: (String) -> Effect<HomeReducer.Action> {
+  var deleteUser: (String) -> Effect<ProfileReducer.Action> {
     { currPassword in
       .run { send in
         do {
           let response = try await useCaseGroup.authUseCase.deleteUser(currPassword)
-          await send(HomeReducer.Action.fetchDeleteUser(.success(response)))
+          await send(ProfileReducer.Action.fetchDeleteUser(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchDeleteUser(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchDeleteUser(.failure(.other(error))))
         }
       }
     }
   }
 
-  var deleteKakaoUser: () -> Effect<HomeReducer.Action> {
+  var deleteKakaoUser: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let response = try await useCaseGroup.authUseCase.deleteKakaoUser()
-          await send(HomeReducer.Action.fetchDeleteKakaoUser(.success(response)))
+          await send(ProfileReducer.Action.fetchDeleteKakaoUser(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchDeleteKakaoUser(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchDeleteKakaoUser(.failure(.other(error))))
         }
       }
     }
   }
 
-  var deleteGoogleUser: () -> Effect<HomeReducer.Action> {
+  var deleteGoogleUser: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let response = try await useCaseGroup.authUseCase.deleteGoogleUser()
-          await send(HomeReducer.Action.fetchDeleteGoogleUser(.success(response)))
+          await send(ProfileReducer.Action.fetchDeleteGoogleUser(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchDeleteGoogleUser(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchDeleteGoogleUser(.failure(.other(error))))
         }
       }
     }
   }
 
-  var deleteAppleUser: () -> Effect<HomeReducer.Action> {
+  var deleteAppleUser: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let response = try await useCaseGroup.authUseCase.deleteAppleUser()
-          await send(HomeReducer.Action.fetchDeleteAppleUser(.success(response)))
+          await send(ProfileReducer.Action.fetchDeleteAppleUser(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchDeleteAppleUser(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchDeleteAppleUser(.failure(.other(error))))
         }
       }
     }
   }
 
-  var getProvider: () -> Effect<HomeReducer.Action> {
+  var getProvider: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let response = try useCaseGroup.authUseCase.getProvider()
-          await send(HomeReducer.Action.fetchProvider(.success(response)))
+          await send(ProfileReducer.Action.fetchProvider(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchProvider(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchProvider(.failure(.other(error))))
         }
       }
     }
   }
 
-  var updateStatus: () -> Effect<HomeReducer.Action> {
+  var updateStatus: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
@@ -138,69 +138,69 @@ extension HomeSideEffect {
           let dbUser = try await useCaseGroup.userUseCase.getUser(user.uid)
           let currentValue = dbUser.isPremium ?? false
           let response = try await useCaseGroup.userUseCase.updateUserStatus(dbUser.uid, !currentValue)
-          await send(HomeReducer.Action.fetchUpdateStatus(.success(response)))
+          await send(ProfileReducer.Action.fetchUpdateStatus(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchUpdateStatus(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchUpdateStatus(.failure(.other(error))))
         }
       }
     }
   }
 
-  var addWishItem: (String) -> Effect<HomeReducer.Action> {
+  var addWishItem: (String) -> Effect<ProfileReducer.Action> {
     { item in
       .run { send in
         do {
           let user = try useCaseGroup.authUseCase.me()
           let response = try await useCaseGroup.userUseCase.addWishItem(user.uid, item)
-          await send(HomeReducer.Action.fetchWishItem(.success(response)))
+          await send(ProfileReducer.Action.fetchWishItem(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchWishItem(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchWishItem(.failure(.other(error))))
         }
       }
     }
   }
 
-  var removeWishItem: (String) -> Effect<HomeReducer.Action> {
+  var removeWishItem: (String) -> Effect<ProfileReducer.Action> {
     { item in
       .run { send in
         do {
           let user = try useCaseGroup.authUseCase.me()
           let response = try await useCaseGroup.userUseCase.removeWishItem(user.uid, item)
-          await send(HomeReducer.Action.fetchRemoveItem(.success(response)))
+          await send(ProfileReducer.Action.fetchRemoveItem(.success(response)))
 
         } catch {
-          await send(HomeReducer.Action.fetchRemoveItem(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchRemoveItem(.failure(.other(error))))
         }
       }
     }
   }
 
-  var addMovieItem: () -> Effect<HomeReducer.Action> {
+  var addMovieItem: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let user = try useCaseGroup.authUseCase.me()
           let item = UserEntity.Movie.Item(id: "1", title: "joker", isPopular: true)
           let response = try await useCaseGroup.userUseCase.addMovie(user.uid, item)
-          await send(HomeReducer.Action.fetchAddMovieItem(.success(response)))
+          await send(ProfileReducer.Action.fetchAddMovieItem(.success(response)))
         } catch {
-          await send(HomeReducer.Action.fetchAddMovieItem(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchAddMovieItem(.failure(.other(error))))
         }
       }
     }
   }
 
-  var removeMovieItem: () -> Effect<HomeReducer.Action> {
+  var removeMovieItem: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
         do {
           let user = try useCaseGroup.authUseCase.me()
           let response = try await useCaseGroup.userUseCase.removeMovieItem(user.uid)
 
-          await send(HomeReducer.Action.fetchRemoveItem(.success(response)))
+          await send(ProfileReducer.Action.fetchRemoveItem(.success(response)))
 
         } catch {
-          await send(HomeReducer.Action.fetchRemoveItem(.failure(.other(error))))
+          await send(ProfileReducer.Action.fetchRemoveItem(.failure(.other(error))))
         }
       }
     }

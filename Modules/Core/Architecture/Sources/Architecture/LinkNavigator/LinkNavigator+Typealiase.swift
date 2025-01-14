@@ -1,4 +1,4 @@
 import Foundation
 import LinkNavigator
 
-public typealias RootNavigatorType = LinkNavigatorFindLocationUsable & TabLinkNavigatorProtocol & Sendable
+public typealias RootNavigatorType = LinkNavigatorFindLocationUsable & Sendable & TabLinkNavigatorProtocol
