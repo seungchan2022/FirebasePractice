@@ -103,4 +103,17 @@ extension ProductSideEffect {
     }
   }
 
+  var addFavoriteProduct: (Int) -> Effect<ProductReducer.Action> {
+    { productId in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.userUseCase.addFavoriteProduct(productId)
+          await send(ProductReducer.Action.fetchAddFavoriteProduct(.success(response)))
+        } catch {
+          await send(ProductReducer.Action.fetchAddFavoriteProduct(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
 }

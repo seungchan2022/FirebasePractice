@@ -46,50 +46,15 @@ extension ProductPage: View {
   var body: some View {
     List {
       ForEach(store.itemList, id: \.id) { item in
-        HStack(alignment: .top, spacing: 8) {
-          AsyncImage(url: URL(string: item.thumbnail ?? "")) { image in
-            image
-              .resizable()
-              .scaledToFill()
-              .frame(width: 75, height: 75)
-              .clipShape(RoundedRectangle(cornerRadius: 10))
-          } placeholder: {
-            ProgressView()
+        ItemComponent(
+          viewState: .init(item: item),
+          text: "Add to Favorite",
+          tapAction: { store.send(.onTapAddFavoriteProduct(item.id)) })
+          .onAppear {
+            guard let last = store.itemList.last, last.id == item.id else { return }
+            guard !store.fetchProductList.isLoading else { return }
+            getProducts()
           }
-          .frame(width: 75, height: 75)
-          .background(
-            RoundedRectangle(cornerRadius: 10)
-              .fill(Color.white))
-          .overlay(
-            RoundedRectangle(cornerRadius: 10)
-              .stroke(Color.black, lineWidth: 0.2))
-          .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-
-          Text("\(item.id)")
-
-          VStack(alignment: .leading, spacing: 4) {
-            Text(item.title ?? "")
-              .font(.headline)
-              .foregroundStyle(.black)
-
-            Text(item.description ?? "")
-              .lineLimit(1)
-
-            Text("Category: \(item.category ?? "")")
-
-            Text("Price: $\((item.price ?? .zero).formatted(.number.precision(.fractionLength(2))))")
-            Text("Rating: \((item.rating ?? .zero).formatted(.number.precision(.fractionLength(2))))")
-
-            Text("TagList: \(item.tagList?.joined(separator: ", ") ?? "")")
-          }
-          .font(.callout)
-          .foregroundStyle(.secondary)
-        }
-        .onAppear {
-          guard let last = store.itemList.last, last.id == item.id else { return }
-          guard !store.fetchProductList.isLoading else { return }
-          getProducts()
-        }
       }
     }
     .toolbar {

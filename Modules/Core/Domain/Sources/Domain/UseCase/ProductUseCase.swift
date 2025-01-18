@@ -3,6 +3,8 @@ import Foundation
 public protocol ProductUseCase: Sendable {
   var downloadItemAndUploadToFirebase: () async throws -> Void { get }
 
+  var getProduct: (String) async throws -> ProductEntity.Product.Item { get }
+
   /// 전체 아이템 리스트
   var getItemList: () async throws -> [ProductEntity.Product.Item] { get }
 

@@ -145,6 +145,28 @@ struct ProductReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapAddFavoriteProduct(let productId):
+        state.fetchAddFavoriteProduct.isLoading = true
+        return sideEffect
+          .addFavoriteProduct(productId)
+          .cancellable(pageID: state.id, id: CancelID.requestAddFavoriteProduct, cancelInFlight: true)
+
+      case .fetchAddFavoriteProduct(let result):
+        state.fetchAddFavoriteProduct.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.useCaseGroup.toastViewModel.send(message: "성공")
+          case false:
+            sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "실패")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -185,6 +207,8 @@ extension ProductReducer {
     var fetchItemListByRating: FetchState.Data<[ProductEntity.Product.Item]?> = .init(isLoading: false, value: .none)
 
     var fetchProductList: FetchState.Data<[ProductEntity.Product.Item]?> = .init(isLoading: false, value: .none)
+
+    var fetchAddFavoriteProduct: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -212,6 +236,9 @@ extension ProductReducer {
     case getProductList(Bool?, String?, Int, ProductEntity.Product.Item?)
     case fetchProductList(Result<[ProductEntity.Product.Item], CompositeErrorRepository>)
 
+    case onTapAddFavoriteProduct(Int)
+    case fetchAddFavoriteProduct(Result<Bool, CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 }
@@ -228,6 +255,7 @@ extension ProductReducer {
     case requestAllItemList
     case requestItemListByRating
     case requestProductList
+    case requestAddFavoriteProduct
   }
 }
 

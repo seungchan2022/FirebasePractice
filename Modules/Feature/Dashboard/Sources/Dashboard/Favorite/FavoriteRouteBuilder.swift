@@ -16,7 +16,7 @@ struct FavoriteRouteBuilder<RootNavigator: RootNavigatorType> {
             reducer: {
               FavoriteReducer(
                 sideEffect: .init(
-                  sideEffect: env,
+                  useCaseGroup: env,
                   navigator: navigator))
             }))
       }

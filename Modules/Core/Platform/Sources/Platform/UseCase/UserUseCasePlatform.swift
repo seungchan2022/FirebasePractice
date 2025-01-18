@@ -14,6 +14,7 @@ public struct UserUseCasePlatform {
 // MARK: UserUseCase
 
 extension UserUseCasePlatform: UserUseCase {
+
   public var getUser: (String) async throws -> UserEntity.User.Response {
     { uid in
       do {
@@ -78,6 +79,82 @@ extension UserUseCasePlatform: UserUseCase {
       }
     }
   }
+
+  /// 여기에 productId는 Product아이템의 ID이고 remove에서는 favoriteList에서 자동 생성된 id?
+  public var addFavoriteProduct: (Int) async throws -> Bool {
+    { productId in
+      guard let me = Auth.auth().currentUser else { return false }
+      let document = Firestore.firestore().collection("users")
+        .document(me.uid)
+        .collection("favorite_list")
+        .document()
+
+      let documentId = document.documentID
+
+      let data: [String: Any] = [
+        "id": documentId,
+        "product_id": productId,
+        "date_created": Date(),
+      ]
+
+      do {
+        try await document.setData(data, merge: false)
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var getFavoriteProduct: () async throws -> [UserEntity.Favorite.Item] {
+    {
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+      let ref = Firestore.firestore().collection("users")
+        .document(me.uid)
+        .collection("favorite_list")
+
+      do {
+        return try await ref.getDocuments(as: UserEntity.Favorite.Item.self)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var removeFavoriteProduct: (String) async throws -> Bool {
+    { favoriteProductId in
+
+      guard let me = Auth.auth().currentUser else { return false }
+
+      let document = Firestore.firestore().collection("users")
+        .document(me.uid)
+        .collection("favorite_list")
+        .document(favoriteProductId)
+
+      do {
+        try await document.delete()
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+//  public var getRemoveFromFavoriteProduct: (String) async throws -> Void {
+//    { productId in
+//
+//      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+//      let ref = Firestore.firestore().collection("users")
+//        .document(me.uid)
+//        .collection("favorite_list")
+//
+//      do {
+//        return  try await ref.getDocuments(as: UserEntity.Favorite.Item.self)
+//      } catch {
+//        throw CompositeErrorRepository.other(error)
+//      }
+//    }
+//  }
 }
 
 extension UserUseCasePlatform {
@@ -129,5 +206,4 @@ extension UserUseCasePlatform {
 
     try await Firestore.firestore().collection("users").document(uid).updateData(data as [AnyHashable: Any])
   }
-
 }

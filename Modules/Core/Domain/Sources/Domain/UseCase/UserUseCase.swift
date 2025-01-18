@@ -12,4 +12,11 @@ public protocol UserUseCase: Sendable {
   var addMovie: (String, UserEntity.Movie.Item) async throws -> UserEntity.User.Response { get }
 
   var removeMovieItem: (String) async throws -> UserEntity.User.Response { get }
+
+  var addFavoriteProduct: (Int) async throws -> Bool { get }
+
+  var removeFavoriteProduct: (String) async throws -> Bool { get }
+
+  var getFavoriteProduct: () async throws -> [UserEntity.Favorite.Item] { get }
+
 }

@@ -35,6 +35,17 @@ extension ProductUseCasePlatform: ProductUseCase {
     }
   }
 
+  public var getProduct: (String) async throws -> ProductEntity.Product.Item {
+    { productId in
+      do {
+        let ref = Firestore.firestore().collection("products").document(productId)
+        return try await ref.getDocument(as: ProductEntity.Product.Item.self)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
   public var getItemList: () async throws -> [ProductEntity.Product.Item] {
     {
       do {
@@ -225,7 +236,7 @@ extension ProductUseCasePlatform {
 }
 
 extension Query {
-  fileprivate func getDocuments<T>(as _: T.Type) async throws -> [T] where T: Codable {
+  public func getDocuments<T>(as _: T.Type) async throws -> [T] where T: Codable {
     let snapshot = try await getDocuments()
 
     return try snapshot.documents.map {
