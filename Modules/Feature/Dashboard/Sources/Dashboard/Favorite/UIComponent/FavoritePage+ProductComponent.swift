@@ -33,7 +33,7 @@ extension FavoritePage.ProductComponent: View {
         ProgressView()
       }
     }
-    .onAppear {
+    .task {
       store.send(.getProduct(viewState.productId))
     }
   }

@@ -23,6 +23,9 @@ let package = Package(
     .package(
       url: "https://github.com/kakao/kakao-ios-sdk.git",
       .upToNextMajor(from: "2.23.0")),
+    .package(
+      url: "https://github.com/CombineCommunity/CombineExt.git",
+      .upToNextMajor(from: "1.8.1")),
   ],
   targets: [
     .target(
@@ -30,6 +33,7 @@ let package = Package(
       dependencies: [
         "Domain",
         "Architecture",
+        "CombineExt",
         .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
         .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
         .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),

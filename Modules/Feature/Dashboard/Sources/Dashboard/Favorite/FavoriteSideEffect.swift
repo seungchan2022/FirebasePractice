@@ -1,14 +1,25 @@
 import Architecture
+import Combine
+import CombineExt
 import ComposableArchitecture
 import Domain
 import Foundation
 import LinkNavigator
+import Platform
 
 // MARK: - FavoriteSideEffect
 
 struct FavoriteSideEffect {
   let useCaseGroup: DashboardSidEffect
+  let main: AnySchedulerOf<DispatchQueue>
   let navigator: RootNavigatorType
+
+  init(useCaseGroup: DashboardSidEffect, main: AnySchedulerOf<DispatchQueue> = .main, navigator: RootNavigatorType) {
+    self.useCaseGroup = useCaseGroup
+    self.main = main
+    self.navigator = navigator
+  }
+
 }
 
 extension FavoriteSideEffect {
@@ -34,6 +45,18 @@ extension FavoriteSideEffect {
         } catch {
           await send(FavoriteReducer.Action.fetchFavoriteProductList(.failure(.other(error))))
         }
+      }
+    }
+  }
+
+  var getListenerForAllUserFavoriteProducts: () -> Effect<FavoriteReducer.Action> {
+    {
+      .publisher {
+        useCaseGroup.userUseCase
+          .addListenerForAllUserFavoriteProducts()
+          .receive(on: main)
+          .mapToResult()
+          .map(FavoriteReducer.Action.fetchListenerForAllUserFavoriteProducts)
       }
     }
   }

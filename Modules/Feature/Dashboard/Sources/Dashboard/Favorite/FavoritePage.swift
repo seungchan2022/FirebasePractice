@@ -19,12 +19,15 @@ extension FavoritePage: View {
         ProductComponent(
           viewState: .init(productId: String(item.productId)),
           text: "Remove to Favorite",
-          tapAction: { store.send(.onTapRemoveFavoriteProduct(item.id)) },
+          tapAction: {
+            store.send(.onTapRemoveFavoriteProduct(item.id))
+          },
           store: store)
       }
     }
     .onAppear {
-      store.send(.getFavoriteProductList)
+//      store.send(.getFavoriteProductList)
+      store.send(.getListenerForAllUserFavoriteProducts)
     }
   }
 }

@@ -1,4 +1,5 @@
 import Architecture
+import Combine
 import Domain
 import Firebase
 import FirebaseFirestore
@@ -236,11 +237,28 @@ extension ProductUseCasePlatform {
 }
 
 extension Query {
-  public func getDocuments<T>(as _: T.Type) async throws -> [T] where T: Codable {
+  func getDocuments<T>(as _: T.Type) async throws -> [T] where T: Codable {
     let snapshot = try await getDocuments()
 
     return try snapshot.documents.map {
       try $0.data(as: T.self)
     }
+  }
+
+  func addSnapshotListener<T>(as _: T.Type) -> (AnyPublisher<[T], CompositeErrorRepository>, ListenerRegistration)
+    where T: Decodable
+  {
+    let publisher = PassthroughSubject<[T], CompositeErrorRepository>()
+
+    let listener = addSnapshotListener { querySnapshot, _ in
+      guard let documents = querySnapshot?.documents else {
+        return
+      }
+
+      let products: [T] = documents.compactMap { try? $0.data(as: T.self) }
+      publisher.send(products)
+    }
+
+    return (publisher.eraseToAnyPublisher(), listener)
   }
 }

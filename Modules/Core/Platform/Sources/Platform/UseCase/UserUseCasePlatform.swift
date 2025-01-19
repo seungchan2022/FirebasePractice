@@ -1,4 +1,5 @@
 import Architecture
+import Combine
 import Domain
 import Firebase
 import FirebaseAuth
@@ -121,6 +122,33 @@ extension UserUseCasePlatform: UserUseCase {
     }
   }
 
+  public var addListenerForAllUserFavoriteProducts: () -> AnyPublisher<[UserEntity.Favorite.Item], CompositeErrorRepository> {
+    {
+      let publisher = PassthroughSubject<[UserEntity.Favorite.Item], CompositeErrorRepository>()
+
+      guard let me = Auth.auth().currentUser
+      else { return Fail(error: CompositeErrorRepository.incorrectUser).eraseToAnyPublisher() }
+
+      let query = Firestore.firestore()
+        .collection("users")
+        .document(me.uid)
+        .collection("favorite_list")
+
+      query.addSnapshotListener { querySnapshot, _ in
+        guard let documents = querySnapshot?.documents else {
+          publisher.send(completion: .failure(.invalidTypeCasting))
+          return
+        }
+
+        let products = documents.compactMap { try? $0.data(as: UserEntity.Favorite.Item.self) }
+
+        publisher.send(products)
+      }
+
+      return publisher.eraseToAnyPublisher()
+    }
+  }
+
   public var removeFavoriteProduct: (String) async throws -> Bool {
     { favoriteProductId in
 
@@ -139,22 +167,6 @@ extension UserUseCasePlatform: UserUseCase {
       }
     }
   }
-
-//  public var getRemoveFromFavoriteProduct: (String) async throws -> Void {
-//    { productId in
-//
-//      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
-//      let ref = Firestore.firestore().collection("users")
-//        .document(me.uid)
-//        .collection("favorite_list")
-//
-//      do {
-//        return  try await ref.getDocuments(as: UserEntity.Favorite.Item.self)
-//      } catch {
-//        throw CompositeErrorRepository.other(error)
-//      }
-//    }
-//  }
 }
 
 extension UserUseCasePlatform {
@@ -205,5 +217,25 @@ extension UserUseCasePlatform {
     ]
 
     try await Firestore.firestore().collection("users").document(uid).updateData(data as [AnyHashable: Any])
+  }
+}
+
+extension Query {
+  func addSnapshotListener<T>(as _: T.Type) -> AnyPublisher<[T], CompositeErrorRepository> where T: Decodable {
+    let subject = PassthroughSubject<[T], CompositeErrorRepository>()
+
+    addSnapshotListener { snapshot, error in
+      if let error {
+        subject.send(completion: .failure(.other(error)))
+        return
+      }
+
+      let documents = snapshot?.documents ?? []
+      let itemList = documents.compactMap { try? $0.data(as: T.self) }
+
+      subject.send(itemList)
+    }
+
+    return subject.eraseToAnyPublisher()
   }
 }

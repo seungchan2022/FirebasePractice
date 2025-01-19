@@ -80,6 +80,24 @@ struct FavoriteReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .getListenerForAllUserFavoriteProducts: state.fetchListenerForAllUserFavoriteProducts.isLoading = true
+
+        return sideEffect
+          .getListenerForAllUserFavoriteProducts()
+          .cancellable(pageID: state.id, id: CancelID.requestListenerForAllUserFavoriteProducts, cancelInFlight: true)
+
+      case .fetchListenerForAllUserFavoriteProducts(let result):
+        state.fetchListenerForAllUserFavoriteProducts.isLoading = true
+        switch result {
+        case .success(let itemList):
+          state.fetchListenerForAllUserFavoriteProducts.value = itemList
+          state.favoriteProductList = itemList
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -108,6 +126,10 @@ extension FavoriteReducer {
 
     var fetchRemoveFavoriteProduct: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
+    var fetchListenerForAllUserFavoriteProducts: FetchState.Data<[UserEntity.Favorite.Item]?> = .init(
+      isLoading: false,
+      value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -123,6 +145,9 @@ extension FavoriteReducer {
     case onTapRemoveFavoriteProduct(String)
     case fetchRemoveFavoriteProduct(Result<Bool, CompositeErrorRepository>)
 
+    case getListenerForAllUserFavoriteProducts
+    case fetchListenerForAllUserFavoriteProducts(Result<[UserEntity.Favorite.Item], CompositeErrorRepository>)
+
     case throwError(CompositeErrorRepository)
   }
 }
@@ -135,5 +160,6 @@ extension FavoriteReducer {
     case requestProduct
     case requestFavoriteProductList
     case requestRemoveFavoriteProduct
+    case requestListenerForAllUserFavoriteProducts
   }
 }

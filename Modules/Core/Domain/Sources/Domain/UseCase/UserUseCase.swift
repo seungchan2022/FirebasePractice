@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 public protocol UserUseCase: Sendable {
@@ -18,5 +19,7 @@ public protocol UserUseCase: Sendable {
   var removeFavoriteProduct: (String) async throws -> Bool { get }
 
   var getFavoriteProduct: () async throws -> [UserEntity.Favorite.Item] { get }
+
+  var addListenerForAllUserFavoriteProducts: () -> AnyPublisher<[UserEntity.Favorite.Item], CompositeErrorRepository> { get }
 
 }
