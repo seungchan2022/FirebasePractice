@@ -21,7 +21,9 @@ extension UserEntity.User {
       created: Date? = .none,
       isPremium: Bool? = .none,
       wishList: [String]? = .none,
-      movie: UserEntity.Movie.Item? = .none)
+      movie: UserEntity.Movie.Item? = .none,
+      profileImagePath: String?,
+      profileImagePathURL: String?)
     {
       self.uid = uid
       self.email = email
@@ -31,6 +33,8 @@ extension UserEntity.User {
       self.isPremium = isPremium
       self.wishList = wishList
       self.movie = movie
+      self.profileImagePath = profileImagePath
+      self.profileImagePathURL = profileImagePathURL
     }
 
     // MARK: Public
@@ -43,6 +47,8 @@ extension UserEntity.User {
     public let isPremium: Bool?
     public let wishList: [String]?
     public let movie: UserEntity.Movie.Item?
+    public let profileImagePath: String?
+    public let profileImagePathURL: String?
 
     // MARK: Private
 
@@ -55,6 +61,8 @@ extension UserEntity.User {
       case isPremium = "is_premium"
       case wishList = "wish_list"
       case movie
+      case profileImagePath = "profile_image_path"
+      case profileImagePathURL = "profile_image_path_url"
     }
   }
 }

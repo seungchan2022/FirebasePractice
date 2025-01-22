@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import DesignSystem
+import PhotosUI
 import SwiftUI
 
 // MARK: - ProfilePage
@@ -13,6 +14,8 @@ extension ProfilePage {
   private var isLoading: Bool {
     store.fetchDBUser.isLoading
       || store.fetchUpdateStatus.isLoading
+      || store.fetchDeleteImage.isLoading
+      || store.fetchSaveProfileImage.isLoading
   }
 
   @MainActor
@@ -35,6 +38,38 @@ extension ProfilePage: View {
   var body: some View {
     List {
       if let user = store.dbUser {
+        Text("image: \(String(describing: store.image))")
+        Text("ProfileImagePath: \(String(describing: store.dbUser?.profileImagePath))")
+        Text("ProfileImagePathURL: \(String(describing: store.dbUser?.profileImagePathURL))")
+
+        PhotosPicker(selection: $store.selectedImageItem, matching: .images, photoLibrary: .shared()) {
+          Text("Select a photo")
+        }
+
+        Group {
+          if
+            let urlString = user.profileImagePathURL,
+            let url = URL(string: urlString)
+          {
+            AsyncImage(url: url) { image in
+              image
+                .resizable()
+                .scaledToFill()
+                .frame(width: 150, height: 150)
+                .cornerRadius(10)
+            } placeholder: {
+              ProgressView()
+                .frame(width: 150, height: 150)
+            }
+          }
+
+          if user.profileImagePath != .none {
+            Button(action: { store.send(.onTapDeleteImage) }) {
+              Text("Delete Image")
+            }
+          }
+        }
+
         Section {
           Text("uid: \(user.uid)")
           Text("email: \(user.email ?? "No Email")")
@@ -246,6 +281,18 @@ extension ProfilePage: View {
       }
     } message: {
       Text("계정을 탈퇴 하려면, 확인 버튼을 눌러주세요.")
+    }
+    .onChange(of: store.selectedImageItem) { _, new in
+      guard let item = new else { return }
+      store.send(.getSaveProfileImage(item))
+    }
+    .onChange(of: store.fetchSaveProfileImage.isLoading) { _, new in
+      guard !new else { return }
+      store.send(.getDBUser)
+    }
+    .onChange(of: store.fetchDeleteImage.isLoading) { _, new in
+      guard !new else { return }
+      store.send(.getDBUser)
     }
     .onAppear {
       store.send(.getDBUser)

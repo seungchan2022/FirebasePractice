@@ -1,9 +1,11 @@
+import _PhotosUI_SwiftUI
 import Architecture
 import Combine
 import Domain
 import Firebase
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseStorage
 import Foundation
 
 // MARK: - UserUseCasePlatform
@@ -167,6 +169,78 @@ extension UserUseCasePlatform: UserUseCase {
       }
     }
   }
+
+  public var saveProfileImage: (PhotosPickerItem) async throws -> (Bool) {
+    { imageItem in
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+      guard let data = try await imageItem.loadTransferable(type: Data.self) else { return false }
+
+      do {
+        let (path, name) = try await saveImage(data: data, userId: me.uid)
+        let url = try await getImageURL(path: path)
+        try await updateUserProfileImagePath(uid: me.uid, path: path, url: url.absoluteString)
+
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var getData: (String) async throws -> Data {
+    { path in
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+      do {
+        return try await getData(userId: me.uid, path: path)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var getImage: (String) async throws -> UIImage {
+    { path in
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+      do {
+        let data = try await getData(userId: me.uid, path: path)
+
+        guard let image = UIImage(data: data) else { throw CompositeErrorRepository.invalidTypeCasting }
+        return image
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var getImageURL: (String) async throws -> URL {
+    { path in
+      do {
+        return try await getImageURL(path: path)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  public var deleteImage: () async throws -> Bool {
+    {
+      guard let me = Auth.auth().currentUser else { return false }
+
+      let user = try await getDBUser(uid: me.uid)
+      do {
+        guard let path = user.profileImagePath else { throw CompositeErrorRepository.invalidTypeCasting }
+
+        try await deleteImage(path: path)
+        try await updateUserProfileImagePath(uid: me.uid, path: .none, url: .none)
+        return true
+
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension UserUseCasePlatform {
@@ -217,6 +291,57 @@ extension UserUseCasePlatform {
     ]
 
     try await Firestore.firestore().collection("users").document(uid).updateData(data as [AnyHashable: Any])
+  }
+
+  func updateUserProfileImagePath(uid: String, path: String?, url: String?) async throws {
+    let data: [String: Any] = [
+      "profile_image_path": path as Any,
+      "profile_image_path_url": url as Any,
+    ]
+
+    try await Firestore.firestore().collection("users").document(uid).updateData(data)
+  }
+
+  func saveImage(data: Data, userId: String) async throws -> (path: String, name: String) {
+    do {
+      let meta = StorageMetadata()
+      meta.contentType = "image/jpeg"
+
+      let storageRef = Storage.storage().reference().child("users")
+      let path = "\(UUID().uuidString).jpeg"
+
+      let returnedMetaData = try await storageRef.child(userId).child(path).putDataAsync(data, metadata: meta)
+
+      guard
+        let returnedPath = returnedMetaData.path,
+        let returnedName = returnedMetaData.name
+      else { throw CompositeErrorRepository.invalidTypeCasting }
+
+      return (returnedPath, returnedName)
+    } catch {
+      throw CompositeErrorRepository.other(error)
+    }
+  }
+
+  func saveImage(image: UIImage, userId: String) async throws -> (path: String, name: String) {
+    guard let data = image.jpegData(compressionQuality: 0.75) else {
+      throw URLError(.backgroundSessionWasDisconnected)
+    }
+
+    return try await saveImage(data: data, userId: userId)
+  }
+
+  func getData(userId _: String, path: String) async throws -> Data {
+//    try await Storage.storage().reference().child("users").child(userId).child(path).data(maxSize: 3 * 1024 * 1024)
+    try await Storage.storage().reference().child(path).data(maxSize: 3 * 1024 * 1024)
+  }
+
+  func getImageURL(path: String) async throws -> URL {
+    try await Storage.storage().reference(withPath: path).downloadURL()
+  }
+
+  func deleteImage(path: String) async throws {
+    try await Storage.storage().reference(withPath: path).delete()
   }
 }
 

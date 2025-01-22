@@ -1,7 +1,9 @@
+import _PhotosUI_SwiftUI
 import Architecture
 import ComposableArchitecture
 import Domain
 import Foundation
+import PhotosUI
 
 // MARK: - ProfileReducer
 
@@ -19,6 +21,100 @@ struct ProfileReducer {
       case .teardown:
         return .concatenate(
           CancelID.allCases.map { .cancel(pageID: state.id, id: $0) })
+
+      case .onTapDeleteImage:
+        state.fetchDeleteImage.isLoading = true
+        return sideEffect
+          .deleteImage()
+          .cancellable(pageID: state.id, id: CancelID.requestDeleteImage, cancelInFlight: true)
+
+      case .fetchDeleteImage(let result):
+        state.fetchDeleteImage.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true: sideEffect.useCaseGroup.toastViewModel.send(message: "성공")
+          case false: sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "실패")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .getImageURL(let path):
+        state.fetchImageURL.isLoading = true
+        return sideEffect
+          .getImageURL(path)
+          .cancellable(pageID: state.id, id: CancelID.requestImageURL, cancelInFlight: true)
+
+      case .fetchImageURL(let result):
+        state.fetchImageURL.isLoading = false
+        switch result {
+        case .success(let imageURL):
+          state.fetchImageURL.value = imageURL
+          state.imageURL = imageURL
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .getImage(let path):
+        state.fetchImage.isLoading = true
+        return sideEffect
+          .getImage(path)
+          .cancellable(pageID: state.id, id: CancelID.requestImage, cancelInFlight: true)
+
+      case .fetchImage(let result):
+        state.fetchImage.isLoading = false
+        switch result {
+        case .success(let image):
+          state.fetchImage.value = image
+          state.image = image
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .getData(let path):
+        state.fetchData.isLoading = true
+        return sideEffect
+          .getData(path)
+          .cancellable(pageID: state.id, id: CancelID.requestData, cancelInFlight: true)
+
+      case .fetchData(let result):
+        state.fetchData.isLoading = false
+        switch result {
+        case .success(let data):
+          state.fetchData.value = data
+          state.imageData = data
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
+      case .getSaveProfileImage(let item):
+        state.fetchSaveProfileImage.isLoading = true
+        return sideEffect
+          .getSaveProfileImage(item)
+          .cancellable(pageID: state.id, id: CancelID.requestSaveProfileImage, cancelInFlight: true)
+
+      case .fetchSaveProfileImage(let result):
+        state.fetchSaveProfileImage.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true: sideEffect.useCaseGroup.toastViewModel.send(message: "성공")
+          case false: sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "실패")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
 
       case .getUser:
         state.fetchUser.isLoading = true
@@ -340,6 +436,11 @@ extension ProfileReducer {
     var user: AuthEntity.Me.Response? = .none
     var dbUser: UserEntity.User.Response? = .none
 
+    var imageData: Data? = .none
+    var selectedImageItem: PhotosPickerItem? = .none
+    var image: UIImage? = .none
+    var imageURL: URL? = .none
+
     let wishList: [String] = ["영화", "스포츠", "독서"]
 
     var providerList: [AuthEntity.ProviderOption.Option] = []
@@ -377,11 +478,31 @@ extension ProfileReducer {
     var fetchAddMovidItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
     var fetchRemoveMovieItem: FetchState.Data<UserEntity.User.Response?> = .init(isLoading: false, value: .none)
 
+    var fetchSaveProfileImage: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+    var fetchData: FetchState.Data<Data?> = .init(isLoading: false, value: .none)
+    var fetchImage: FetchState.Data<UIImage?> = .init(isLoading: false, value: .none)
+    var fetchImageURL: FetchState.Data<URL?> = .init(isLoading: false, value: .none)
+    var fetchDeleteImage: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
     case binding(BindingAction<State>)
     case teardown
+
+    case onTapDeleteImage
+    case fetchDeleteImage(Result<Bool, CompositeErrorRepository>)
+
+    case getImageURL(String)
+    case fetchImageURL(Result<URL, CompositeErrorRepository>)
+
+    case getImage(String)
+    case fetchImage(Result<UIImage, CompositeErrorRepository>)
+
+    case getData(String)
+    case fetchData(Result<Data, CompositeErrorRepository>)
+
+    case getSaveProfileImage(PhotosPickerItem)
+    case fetchSaveProfileImage(Result<Bool, CompositeErrorRepository>)
 
     case getUser
     case fetchUser(Result<AuthEntity.Me.Response, CompositeErrorRepository>)
@@ -449,5 +570,10 @@ extension ProfileReducer {
     case requestRemoveWishItem
     case requestAddMovieItem
     case requestRemoveMovieItem
+    case requestSaveProfileImage
+    case requestData
+    case requestImage
+    case requestImageURL
+    case requestDeleteImage
   }
 }

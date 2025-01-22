@@ -1,3 +1,4 @@
+import _PhotosUI_SwiftUI
 import Architecture
 import ComposableArchitecture
 import Domain
@@ -12,6 +13,73 @@ struct ProfileSideEffect {
 }
 
 extension ProfileSideEffect {
+
+  var deleteImage: () -> Effect<ProfileReducer.Action> {
+    {
+      .run { send in
+        do {
+          let response = try await useCaseGroup.userUseCase.deleteImage()
+          await send(ProfileReducer.Action.fetchDeleteImage(.success(response)))
+        } catch {
+          await send(ProfileReducer.Action.fetchDeleteImage(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var getImageURL: (String) -> Effect<ProfileReducer.Action> {
+    { path in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.userUseCase.getImageURL(path)
+          await send(ProfileReducer.Action.fetchImageURL(.success(response)))
+        } catch {
+          await send(ProfileReducer.Action.fetchImageURL(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var getImage: (String) -> Effect<ProfileReducer.Action> {
+    { path in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.userUseCase.getImage(path)
+          await send(ProfileReducer.Action.fetchImage(.success(response)))
+        } catch {
+          await send(ProfileReducer.Action.fetchImage(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var getData: (String) -> Effect<ProfileReducer.Action> {
+    { path in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.userUseCase.getData(path)
+          await send(ProfileReducer.Action.fetchData(.success(response)))
+        } catch {
+          await send(ProfileReducer.Action.fetchData(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
+  var getSaveProfileImage: (PhotosPickerItem) -> Effect<ProfileReducer.Action> {
+    { item in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.userUseCase.saveProfileImage(item)
+          await send(ProfileReducer.Action.fetchSaveProfileImage(.success(response)))
+
+        } catch {
+          await send(ProfileReducer.Action.fetchSaveProfileImage(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var getUser: () -> Effect<ProfileReducer.Action> {
     {
       .run { send in
