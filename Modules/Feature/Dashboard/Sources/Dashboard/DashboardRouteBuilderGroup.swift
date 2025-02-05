@@ -16,6 +16,8 @@ extension DashboardRouteBuilderGroup {
       SignUpRouteBuilder.generate(),
       ProductRouteBuilder.generate(),
       FavoriteRouteBuilder.generate(),
+      TodoListRouteBuilder.generate(),
+      TodoDetailRouteBuilder.generate(),
     ]
   }
 }

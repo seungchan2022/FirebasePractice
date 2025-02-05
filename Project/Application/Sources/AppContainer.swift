@@ -31,7 +31,8 @@ extension AppContainer {
       toastViewModel: ToastViewModel(),
       authUseCase: AuthUseCasePlatform(),
       userUseCase: UserUseCasePlatform(),
-      productUseCase: ProductUseCasePlatform())
+      productUseCase: ProductUseCasePlatform(),
+      todoListUseCase: TodoListUseCasePlatform())
 
     return .init(
       dependency: sideEffect,

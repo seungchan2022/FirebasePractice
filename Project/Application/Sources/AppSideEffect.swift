@@ -12,4 +12,5 @@ struct AppSideEffect: DependencyType, DashboardSidEffect {
   let authUseCase: AuthUseCase
   let userUseCase: UserUseCase
   let productUseCase: ProductUseCase
+  let todoListUseCase: TodoListUseCase
 }

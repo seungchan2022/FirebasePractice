@@ -176,7 +176,7 @@ extension UserUseCasePlatform: UserUseCase {
       guard let data = try await imageItem.loadTransferable(type: Data.self) else { return false }
 
       do {
-        let (path, name) = try await saveImage(data: data, userId: me.uid)
+        let (path, _) = try await saveImage(data: data, userId: me.uid)
         let url = try await getImageURL(path: path)
         try await updateUserProfileImagePath(uid: me.uid, path: path, url: url.absoluteString)
 

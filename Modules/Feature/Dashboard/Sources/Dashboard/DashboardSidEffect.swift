@@ -7,4 +7,5 @@ public protocol DashboardSidEffect: Sendable {
   var authUseCase: AuthUseCase { get }
   var userUseCase: UserUseCase { get }
   var productUseCase: ProductUseCase { get }
+  var todoListUseCase: TodoListUseCase { get }
 }
