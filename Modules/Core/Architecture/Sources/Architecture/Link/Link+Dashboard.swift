@@ -16,6 +16,6 @@ extension Link.Dashboard {
     case product
     case favorite
     case todoList
-    case todoDetail
+    case todoListDetail
   }
 }

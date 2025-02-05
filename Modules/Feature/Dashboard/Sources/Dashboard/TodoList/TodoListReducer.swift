@@ -84,7 +84,7 @@ extension TodoListReducer {
 
     var categoryText = ""
 
-    var categoryItemList: [TodoListEntity.Category.Item]? = .none
+    var categoryItemList: [TodoListEntity.Category.Item] = []
 
     var fetchAddCategoryItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchCategoryItemList: FetchState.Data<[TodoListEntity.Category.Item]?> = .init(isLoading: false, value: .none)
@@ -111,7 +111,6 @@ extension TodoListReducer {
 extension TodoListReducer {
   enum CancelID: Equatable, CaseIterable {
     case teardown
-    case requestDBUser
     case requestAddCategory
     case requestAddCategoryItem
     case requestCategoryItemList

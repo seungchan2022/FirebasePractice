@@ -7,4 +7,11 @@ public protocol TodoListUseCase: Sendable {
   var getCategoryItem: (String, String) async throws -> TodoListEntity.Category.Item { get }
 
   var getCategoryItemList: (String) async throws -> [TodoListEntity.Category.Item] { get }
+
+  var addTodoItem: (String, String, TodoListEntity.TodoItem.Item) async throws -> Bool { get }
+
+  var getTodoItem: (String, String, String) async throws -> TodoListEntity.TodoItem.Item { get }
+
+  var getTodoItemList: (String, String) async throws -> [TodoListEntity.TodoItem.Item] { get }
+
 }

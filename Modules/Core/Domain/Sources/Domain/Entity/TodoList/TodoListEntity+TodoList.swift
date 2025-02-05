@@ -29,7 +29,6 @@ extension TodoListEntity.Category {
       case dateCreated = "date_created"
     }
   }
-
 }
 
 // MARK: - TodoListEntity.TodoItem.Item
@@ -42,13 +41,11 @@ extension TodoListEntity.TodoItem {
     public init(
       id: String = UUID().uuidString,
       categoryId: String,
-      categoryTitle: String,
-      title: String = "",
+      title: String,
       dateCreated: Date = .now)
     {
       self.id = id
       self.categoryId = categoryId
-      self.categoryTitle = categoryTitle
       self.title = title
       self.dateCreated = dateCreated
     }
@@ -57,7 +54,6 @@ extension TodoListEntity.TodoItem {
 
     public let id: String
     public let categoryId: String
-    public let categoryTitle: String
     public let title: String
     public let dateCreated: Date
 
@@ -66,7 +62,6 @@ extension TodoListEntity.TodoItem {
     private enum CodingKeys: String, CodingKey {
       case id
       case categoryId = "category_id"
-      case categoryTitle = "category_title"
       case title
       case dateCreated = "date_created"
     }

@@ -43,7 +43,7 @@ extension TodoListSideEffect {
     { item in
       navigator.next(
         linkItem: .init(
-          path: Link.Dashboard.Path.todoDetail.rawValue,
+          path: Link.Dashboard.Path.todoListDetail.rawValue,
           items: item),
         isAnimated: true)
     }

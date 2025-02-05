@@ -43,11 +43,9 @@ extension TodoListPage: View {
         }
         .padding(.horizontal, 16)
 
-        if let itemList = store.categoryItemList {
-          ForEach(itemList, id: \.id) { item in
-            Button(action: { store.send(.onTapCategoryItem(item)) }) {
-              Text(item.title)
-            }
+        ForEach(store.categoryItemList, id: \.id) { item in
+          Button(action: { store.send(.onTapCategoryItem(item)) }) {
+            Text(item.title)
           }
         }
       }
