@@ -83,6 +83,7 @@ extension TodoListReducer {
     }
 
     var categoryText = ""
+    var isShowAlert = false
 
     var categoryItemList: [TodoListEntity.Category.Item] = []
 

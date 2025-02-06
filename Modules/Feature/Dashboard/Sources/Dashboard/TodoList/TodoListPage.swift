@@ -19,35 +19,21 @@ extension TodoListPage {
 extension TodoListPage: View {
   var body: some View {
     ScrollView {
-      VStack {
-        HStack {
-          TextField("원하는 카테고리를 입력해주세요.", text: $store.categoryText)
-            .padding(.leading)
-            .frame(maxWidth: .infinity)
-            .frame(height: 55)
-            .background(.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 16))
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled(true)
-
-          Spacer()
-
-          Button(action: {
-            store.send(.onTapAddCategoryItem(.init(title: store.categoryText)))
-            store.categoryText = ""
-          }) {
-            Text("추가")
-          }
-          .frame(height: 55)
-          .buttonStyle(.borderedProminent)
-          .disabled(isActive)
-        }
-        .padding(.horizontal, 16)
-
+      LazyVStack(alignment: .leading, spacing: 20) {
         ForEach(store.categoryItemList, id: \.id) { item in
-          Button(action: { store.send(.onTapCategoryItem(item)) }) {
-            Text(item.title)
-          }
+          ItemComponent(
+            viewState: .init(item: item),
+            tapAction: { store.send(.onTapCategoryItem($0)) },
+            deleteAction: { },
+            updateAction: { },
+            shareAction: { })
         }
+      }
+      .padding(.top, 32)
+    }
+    .toolbar {
+      ToolbarItem(placement: .topBarTrailing) {
+        AddCategoryComponent(viewState: .init(), store: store)
       }
     }
     .onAppear {
