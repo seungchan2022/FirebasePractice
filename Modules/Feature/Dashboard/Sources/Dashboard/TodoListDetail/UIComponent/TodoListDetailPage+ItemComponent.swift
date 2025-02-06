@@ -2,12 +2,12 @@ import Domain
 import Foundation
 import SwiftUI
 
-// MARK: - TodoListPage.ItemComponent
+// MARK: - TodoListDetailPage.ItemComponent
 
-extension TodoListPage {
+extension TodoListDetailPage {
   struct ItemComponent {
     let viewState: ViewState
-    let tapAction: (TodoListEntity.Category.Item) -> Void
+    let tapAction: (TodoListEntity.TodoItem.Item) -> Void
 
     let deleteAction: () -> Void
     let updateAction: () -> Void
@@ -15,11 +15,11 @@ extension TodoListPage {
   }
 }
 
-extension TodoListPage.ItemComponent { }
+extension TodoListDetailPage.ItemComponent { }
 
-// MARK: - TodoListPage.ItemComponent + View
+// MARK: - TodoListDetailPage.ItemComponent + View
 
-extension TodoListPage.ItemComponent: View {
+extension TodoListDetailPage.ItemComponent: View {
   var body: some View {
     VStack {
       HStack {
@@ -70,10 +70,10 @@ extension TodoListPage.ItemComponent: View {
   }
 }
 
-// MARK: - TodoListPage.ItemComponent.ViewState
+// MARK: - TodoListDetailPage.ItemComponent.ViewState
 
-extension TodoListPage.ItemComponent {
+extension TodoListDetailPage.ItemComponent {
   struct ViewState: Equatable {
-    let item: TodoListEntity.Category.Item
+    let item: TodoListEntity.TodoItem.Item
   }
 }

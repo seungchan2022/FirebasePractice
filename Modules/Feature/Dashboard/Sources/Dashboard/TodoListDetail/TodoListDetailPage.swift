@@ -14,47 +14,25 @@ extension TodoListDetailPage { }
 extension TodoListDetailPage: View {
   var body: some View {
     ScrollView {
-      VStack {
+      LazyVStack {
         ForEach(store.todoItemList, id: \.id) { item in
-          Text(item.title)
+          ItemComponent(
+            viewState: .init(item: item),
+            tapAction: { _ in },
+            deleteAction: { },
+            updateAction: { },
+            shareAction: { })
         }
       }
+      .padding(.top, 32)
     }
     .navigationTitle(store.categoryItem.title)
     .toolbar {
       ToolbarItem(placement: .topBarTrailing) {
-        Button(action: { store.isShowAlert = true }) {
-          Image(systemName: "plus")
-        }
+        AddTodoItemComponent(
+          viewState: .init(),
+          store: store)
       }
-    }
-    .alert(
-      "투두를 입력해주세요.",
-      isPresented: $store.isShowAlert)
-    {
-      TextField("Todo", text: $store.todoTitleText)
-        .autocorrectionDisabled(true)
-        .textInputAutocapitalization(.never)
-
-      Button(action: {
-        store.send(
-          .onTapAddTodoItem(
-            .init(
-              categoryId: store.categoryItem.id,
-              title: store.todoTitleText)))
-        store.todoTitleText = ""
-      }) {
-        Text("확인")
-      }
-
-      Button(role: .cancel, action: {
-        store.todoTitleText = ""
-        store.isShowAlert = false
-      }) {
-        Text("취소")
-      }
-    } message: {
-      Text("추가하고 싶은 투두를 입력하고, 확인 버튼을 눌러주세요.")
     }
     .onAppear {
       store.send(.getCategoryItem(store.categoryItem))
