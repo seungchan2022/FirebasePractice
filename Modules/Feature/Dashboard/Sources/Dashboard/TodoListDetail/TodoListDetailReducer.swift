@@ -78,6 +78,23 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapUpdateItemState(let categoryId, let todoId):
+        state.fetchUpdateTodoItemStatus.isLoading = true
+        return sideEffect
+          .updateTodoItemStatus(categoryId, todoId)
+          .cancellable(pageID: state.id, id: CancelID.requestUpdateToItemStatus, cancelInFlight: true)
+
+      case .fetchUpdateTodoItemStatus(let result):
+        state.fetchUpdateTodoItemStatus.isLoading = true
+        switch result {
+        case .success(let item):
+          state.todoItemList = state.todoItemList.mutate(item: item)
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -116,6 +133,9 @@ extension TodoListDetailReducer {
 
     var fetchAddTodoItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchTodoItemList: FetchState.Data<[TodoListEntity.TodoItem.Item]?> = .init(isLoading: false, value: .none)
+
+    var fetchUpdateTodoItemStatus: FetchState.Data<TodoListEntity.TodoItem.Item?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -127,9 +147,12 @@ extension TodoListDetailReducer {
 
     case onTapAddTodoItem(TodoListEntity.TodoItem.Item)
     case fetchAddTodoItem(Result<Bool, CompositeErrorRepository>)
-    //
+
     case getTodoItemList
     case fetchTodoItemList(Result<[TodoListEntity.TodoItem.Item], CompositeErrorRepository>)
+
+    case onTapUpdateItemState(String, String)
+    case fetchUpdateTodoItemStatus(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
     case throwError(CompositeErrorRepository)
   }
@@ -143,5 +166,12 @@ extension TodoListDetailReducer {
     case requestCategoryItem
     case requestAddTodoItem
     case requestTodoItemList
+    case requestUpdateToItemStatus
+  }
+}
+
+extension [TodoListEntity.TodoItem.Item] {
+  fileprivate func mutate(item: TodoListEntity.TodoItem.Item) -> Self {
+    self.map { $0.id == item.id ? item : $0 }
   }
 }

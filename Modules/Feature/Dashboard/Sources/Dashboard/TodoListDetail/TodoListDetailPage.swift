@@ -19,8 +19,11 @@ extension TodoListDetailPage: View {
           ItemComponent(
             viewState: .init(item: item),
             tapAction: { _ in },
+            updateAction: {
+              store.send(.onTapUpdateItemState(item.categoryId, item.id))
+            },
             deleteAction: { },
-            updateAction: { },
+            editAction: { },
             shareAction: { })
         }
       }

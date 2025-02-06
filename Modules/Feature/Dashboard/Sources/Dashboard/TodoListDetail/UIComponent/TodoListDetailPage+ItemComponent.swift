@@ -9,8 +9,10 @@ extension TodoListDetailPage {
     let viewState: ViewState
     let tapAction: (TodoListEntity.TodoItem.Item) -> Void
 
-    let deleteAction: () -> Void
     let updateAction: () -> Void
+
+    let deleteAction: () -> Void
+    let editAction: () -> Void
     let shareAction: () -> Void
   }
 }
@@ -22,7 +24,29 @@ extension TodoListDetailPage.ItemComponent { }
 extension TodoListDetailPage.ItemComponent: View {
   var body: some View {
     VStack {
-      HStack {
+      HStack(spacing: 12) {
+        Button(action: { updateAction() }) {
+          if viewState.item.isCompleted ?? false {
+            Image(systemName: "checkmark.square")
+              .imageScale(.large)
+              .foregroundStyle(.black)
+              .background {
+                Circle()
+                  .fill(.clear)
+                  .frame(width: 30, height: 30)
+              }
+          } else {
+            Image(systemName: "square")
+              .imageScale(.large)
+              .foregroundStyle(.black)
+              .background {
+                Circle()
+                  .fill(.clear)
+                  .frame(width: 30, height: 30)
+              }
+          }
+        }
+
         Button(action: { tapAction(viewState.item) }) {
           Text(viewState.item.title)
             .font(.title)
@@ -31,17 +55,22 @@ extension TodoListDetailPage.ItemComponent: View {
           Spacer()
         }
 
-        Image(systemName: "ellipsis")
-          .imageScale(.large)
-          .foregroundStyle(.black)
-          .background {
-            Circle()
-              .fill(.clear)
-              .frame(width: 30, height: 30)
+        Circle()
+          .fill(.clear)
+          .frame(width: 30, height: 30)
+          .overlay {
+            Image(systemName: "ellipsis")
+              .imageScale(.large)
+              .foregroundStyle(.black)
+              .background {
+                Circle()
+                  .fill(.clear)
+                  .frame(width: 30, height: 30)
+              }
           }
           .padding(.horizontal, 16)
           .contextMenu {
-            Button(action: { updateAction() }) {
+            Button(action: { editAction() }) {
               HStack {
                 Text("수정")
                 Image(systemName: "square.and.pencil")

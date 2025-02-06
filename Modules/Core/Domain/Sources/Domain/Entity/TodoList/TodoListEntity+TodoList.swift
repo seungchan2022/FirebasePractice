@@ -42,11 +42,13 @@ extension TodoListEntity.TodoItem {
       id: String = UUID().uuidString,
       categoryId: String,
       title: String,
+      isCompleted: Bool? = .none,
       dateCreated: Date = .now)
     {
       self.id = id
       self.categoryId = categoryId
       self.title = title
+      self.isCompleted = isCompleted
       self.dateCreated = dateCreated
     }
 
@@ -55,6 +57,7 @@ extension TodoListEntity.TodoItem {
     public let id: String
     public let categoryId: String
     public let title: String
+    public let isCompleted: Bool?
     public let dateCreated: Date
 
     // MARK: Private
@@ -63,6 +66,7 @@ extension TodoListEntity.TodoItem {
       case id
       case categoryId = "category_id"
       case title
+      case isCompleted = "is_completed"
       case dateCreated = "date_created"
     }
   }

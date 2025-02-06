@@ -10,7 +10,7 @@ extension TodoListPage {
     let tapAction: (TodoListEntity.Category.Item) -> Void
 
     let deleteAction: () -> Void
-    let updateAction: () -> Void
+    let editAction: () -> Void
     let shareAction: () -> Void
   }
 }
@@ -31,17 +31,22 @@ extension TodoListPage.ItemComponent: View {
           Spacer()
         }
 
-        Image(systemName: "ellipsis")
-          .imageScale(.large)
-          .foregroundStyle(.black)
-          .background {
-            Circle()
-              .fill(.clear)
-              .frame(width: 30, height: 30)
+        Circle()
+          .fill(.clear)
+          .frame(width: 30, height: 30)
+          .overlay {
+            Image(systemName: "ellipsis")
+              .imageScale(.large)
+              .foregroundStyle(.black)
+              .background {
+                Circle()
+                  .fill(.clear)
+                  .frame(width: 30, height: 30)
+              }
           }
           .padding(.horizontal, 16)
           .contextMenu {
-            Button(action: { updateAction() }) {
+            Button(action: { editAction() }) {
               HStack {
                 Text("수정")
                 Image(systemName: "square.and.pencil")
