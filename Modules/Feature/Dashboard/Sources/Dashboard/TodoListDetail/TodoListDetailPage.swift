@@ -23,7 +23,7 @@ extension TodoListDetailPage: View {
             updateAction: {
               store.send(.onTapUpdateItemStatus(item.categoryId, item.id))
             },
-            deleteAction: { },
+            deleteAction: { store.send(.onTapDeleteTodoItem($0)) },
             editAction: { },
             shareAction: { })
         }

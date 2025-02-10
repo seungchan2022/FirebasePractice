@@ -69,6 +69,19 @@ extension TodoListDetailSideEffect {
     }
   }
 
+  var deleteTodoItem: (TodoListEntity.TodoItem.Item) -> Effect<TodoListDetailReducer.Action> {
+    { item in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.todoListUseCase.deleteTodoItem(item)
+          await send(TodoListDetailReducer.Action.fetchDeleteTodoItem(.success(response)))
+        } catch {
+          await send(TodoListDetailReducer.Action.fetchDeleteTodoItem(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeTodo: (TodoListEntity.TodoItem.Item) -> Void {
     { item in
       navigator.fullSheet(

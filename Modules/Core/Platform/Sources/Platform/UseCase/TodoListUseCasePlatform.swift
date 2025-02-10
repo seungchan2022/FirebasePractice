@@ -123,9 +123,25 @@ extension TodoListUseCasePlatform: TodoListUseCase {
       }
     }
   }
+
+  public var deleteTodoItem: (TodoListEntity.TodoItem.Item) async throws -> Bool {
+    { item in
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+      do {
+        try await deleteTodoItem(uid: me.uid, categoryId: item.categoryId, todoId: item.id)
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension TodoListUseCasePlatform {
+
+  // MARK: Internal
+
   func addCategoryItem(uid: String, item: TodoListEntity.Category.Item) async throws {
     let docRef = Firestore.firestore()
       .collection("users")
@@ -176,5 +192,18 @@ extension TodoListUseCasePlatform {
       .collection("todo_list")
       .document(todoId)
       .updateData(data)
+  }
+
+  // MARK: Private
+
+  private func deleteTodoItem(uid: String, categoryId: String, todoId: String) async throws {
+    try await Firestore.firestore()
+      .collection("users")
+      .document(uid)
+      .collection("category_list")
+      .document(categoryId)
+      .collection("todo_list")
+      .document(todoId)
+      .delete()
   }
 }

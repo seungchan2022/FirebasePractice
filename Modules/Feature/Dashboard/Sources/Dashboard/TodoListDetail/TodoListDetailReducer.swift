@@ -95,6 +95,29 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapDeleteTodoItem(let item):
+        state.fetchDeleteTodoItem.isLoading = true
+        return sideEffect
+          .deleteTodoItem(item)
+          .cancellable(pageID: state.id, id: CancelID.requestDeleteTodoItem, cancelInFlight: true)
+
+      case .fetchDeleteTodoItem(let result):
+        state.fetchDeleteTodoItem.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.useCaseGroup.toastViewModel.send(message: "성공")
+            return .run { await $0(.getTodoItemList) }
+
+          case false: sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "실패")
+          }
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .onTapTodoItem(let item):
         sideEffect.routeTodo(item)
         return .none
@@ -140,6 +163,8 @@ extension TodoListDetailReducer {
 
     var fetchUpdateTodoItemStatus: FetchState.Data<TodoListEntity.TodoItem.Item?> = .init(isLoading: false, value: .none)
 
+    var fetchDeleteTodoItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -158,6 +183,9 @@ extension TodoListDetailReducer {
     case onTapUpdateItemStatus(String, String)
     case fetchUpdateTodoItemStatus(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
+    case onTapDeleteTodoItem(TodoListEntity.TodoItem.Item)
+    case fetchDeleteTodoItem(Result<Bool, CompositeErrorRepository>)
+
     case onTapTodoItem(TodoListEntity.TodoItem.Item)
 
     case throwError(CompositeErrorRepository)
@@ -173,6 +201,7 @@ extension TodoListDetailReducer {
     case requestAddTodoItem
     case requestTodoItemList
     case requestUpdateToItemStatus
+    case requestDeleteTodoItem
   }
 }
 

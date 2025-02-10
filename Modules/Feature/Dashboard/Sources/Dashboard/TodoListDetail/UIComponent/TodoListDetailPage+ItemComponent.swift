@@ -11,7 +11,7 @@ extension TodoListDetailPage {
 
     let updateAction: () -> Void
 
-    let deleteAction: () -> Void
+    let deleteAction: (TodoListEntity.TodoItem.Item) -> Void
     let editAction: () -> Void
     let shareAction: () -> Void
   }
@@ -94,7 +94,10 @@ extension TodoListDetailPage.ItemComponent: View {
               }
             }
 
-            Button(role: .destructive, action: { deleteAction() }) {
+            Button(role: .destructive, action: { deleteAction(
+              viewState
+                .item) })
+            {
               HStack {
                 Text("삭제")
                 Image(systemName: "trash")
