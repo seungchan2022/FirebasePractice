@@ -68,4 +68,14 @@ extension TodoListDetailSideEffect {
       }
     }
   }
+
+  var routeTodo: (TodoListEntity.TodoItem.Item) -> Void {
+    { item in
+      navigator.sheet(
+        linkItem: .init(
+          path: Link.Dashboard.Path.todo.rawValue,
+          items: item),
+        isAnimated: true)
+    }
+  }
 }

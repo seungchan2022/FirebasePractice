@@ -112,6 +112,17 @@ extension TodoListUseCasePlatform: TodoListUseCase {
       }
     }
   }
+
+  public var updateMemo: (String, String, String, String) async throws -> TodoListEntity.TodoItem.Item {
+    { uid, categoryId, todoId, memoText in
+      do {
+        try await updateMemo(uid: uid, categoryId: categoryId, todoId: todoId, memoText: memoText)
+        return try await getTodoItem(uid, categoryId, todoId)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension TodoListUseCasePlatform {
@@ -140,6 +151,21 @@ extension TodoListUseCasePlatform {
   func updateTodoItemStatus(uid: String, categoryId: String, todoId: String, isCompleted: Bool) async throws {
     let data: [String: Any] = [
       "is_completed" : isCompleted,
+    ]
+
+    try await Firestore.firestore()
+      .collection("users")
+      .document(uid)
+      .collection("category_list")
+      .document(categoryId)
+      .collection("todo_list")
+      .document(todoId)
+      .updateData(data)
+  }
+
+  func updateMemo(uid: String, categoryId: String, todoId: String, memoText: String) async throws {
+    let data: [String: Any] = [
+      "memo": memoText,
     ]
 
     try await Firestore.firestore()

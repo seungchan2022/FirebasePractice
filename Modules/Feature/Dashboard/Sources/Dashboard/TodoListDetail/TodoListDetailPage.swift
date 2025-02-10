@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import Domain
 import SwiftUI
 
 // MARK: - TodoListDetailPage
@@ -18,7 +19,7 @@ extension TodoListDetailPage: View {
         ForEach(store.todoItemList, id: \.id) { item in
           ItemComponent(
             viewState: .init(item: item),
-            tapAction: { _ in },
+            tapAction: { store.send(.onTapTodoItem($0)) },
             updateAction: {
               store.send(.onTapUpdateItemState(item.categoryId, item.id))
             },
@@ -37,6 +38,7 @@ extension TodoListDetailPage: View {
           store: store)
       }
     }
+
     .onAppear {
       store.send(.getCategoryItem(store.categoryItem))
       store.send(.getTodoItemList)

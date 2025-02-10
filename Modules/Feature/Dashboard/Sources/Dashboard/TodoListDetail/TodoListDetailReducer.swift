@@ -95,6 +95,10 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapTodoItem(let item):
+        sideEffect.routeTodo(item)
+        return .none
+
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
         return .none
@@ -153,6 +157,8 @@ extension TodoListDetailReducer {
 
     case onTapUpdateItemState(String, String)
     case fetchUpdateTodoItemStatus(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
+
+    case onTapTodoItem(TodoListEntity.TodoItem.Item)
 
     case throwError(CompositeErrorRepository)
   }
