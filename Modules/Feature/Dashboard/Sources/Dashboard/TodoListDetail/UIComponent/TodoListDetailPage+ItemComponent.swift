@@ -51,6 +51,16 @@ extension TodoListDetailPage.ItemComponent: View {
           Text(viewState.item.title)
             .font(.title)
             .foregroundStyle(.black)
+            .lineLimit(1)
+
+          if let memo = viewState.item.memo, !memo.isEmpty {
+            HStack {
+              Image(systemName: "text.page.fill")
+              Text("메모")
+            }
+            .foregroundStyle(.black)
+            .padding(.leading, 16)
+          }
 
           Spacer()
         }

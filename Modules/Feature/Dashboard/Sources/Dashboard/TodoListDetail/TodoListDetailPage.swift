@@ -21,7 +21,7 @@ extension TodoListDetailPage: View {
             viewState: .init(item: item),
             tapAction: { store.send(.onTapTodoItem($0)) },
             updateAction: {
-              store.send(.onTapUpdateItemState(item.categoryId, item.id))
+              store.send(.onTapUpdateItemStatus(item.categoryId, item.id))
             },
             deleteAction: { },
             editAction: { },

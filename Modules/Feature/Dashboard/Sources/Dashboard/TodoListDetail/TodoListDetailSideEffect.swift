@@ -71,11 +71,12 @@ extension TodoListDetailSideEffect {
 
   var routeTodo: (TodoListEntity.TodoItem.Item) -> Void {
     { item in
-      navigator.sheet(
+      navigator.fullSheet(
         linkItem: .init(
           path: Link.Dashboard.Path.todo.rawValue,
           items: item),
-        isAnimated: true)
+        isAnimated: true,
+        prefersLargeTitles: false)
     }
   }
 }

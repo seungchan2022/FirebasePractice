@@ -21,43 +21,41 @@ extension TodoPage: View {
   var body: some View {
     ScrollView {
       VStack {
-        if let item = store.fetchTodoItem.value {
-          Text(item.title)
-
-          TextEditor(text: $store.memoText)
-            .padding(15)
-            .background(alignment: .topLeading) {
-              if store.memoText.isEmpty {
-                Text("남기고 싶은 메모를 작성해주세요.")
-                  .padding(20)
-                  .padding(.top, 2)
-                  .font(.system(size: 14))
-                  .foregroundColor(Color(UIColor.systemGray2))
-              }
-            }
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .background(Color(UIColor.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .scrollContentBackground(.hidden)
-            .font(.system(size: 16))
-            .frame(height: 200)
-            .overlay(alignment: .bottomTrailing) {
-              Text("\(store.memoText.count) / 200")
-                .font(.system(size: 12))
+        TextEditor(text: $store.memoText)
+          .padding(15)
+          .background(alignment: .topLeading) {
+            if store.memoText.isEmpty {
+              Text("남기고 싶은 메모를 작성해주세요.")
+                .padding(20)
+                .padding(.top, 2)
+                .font(.system(size: 14))
                 .foregroundColor(Color(UIColor.systemGray2))
-                .padding(.trailing, 15)
-                .padding(.bottom, 15)
-                .onChange(of: store.memoText) { _, new in
-                  if new.count > 200 {
-                    store.memoText = String(new.prefix(200))
-                  }
-                }
             }
-            .padding(.horizontal, 16)
-        }
+          }
+          .textInputAutocapitalization(.never)
+          .autocorrectionDisabled()
+          .background(Color(UIColor.systemGray6))
+          .clipShape(RoundedRectangle(cornerRadius: 20))
+          .scrollContentBackground(.hidden)
+          .font(.system(size: 16))
+          .frame(height: 300)
+          .overlay(alignment: .bottomTrailing) {
+            Text("\(store.memoText.count) / 200")
+              .font(.system(size: 12))
+              .foregroundColor(Color(UIColor.systemGray2))
+              .padding(.trailing, 15)
+              .padding(.bottom, 15)
+              .onChange(of: store.memoText) { _, new in
+                if new.count > 200 {
+                  store.memoText = String(new.prefix(200))
+                }
+              }
+          }
+          .padding(.horizontal, 16)
+          .padding(.top, 32)
       }
     }
+    .navigationTitle(store.todoItem.title)
     .toolbar {
       ToolbarItem(placement: .topBarLeading) {
         Button(action: { store.isShowAlert = true }) {
@@ -70,7 +68,7 @@ extension TodoPage: View {
         {
           Button(
             role: .cancel,
-            action: { store.send(.onTapClose) })
+            action: { })
           {
             Text("취소")
               .foregroundStyle(.red)

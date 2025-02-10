@@ -78,14 +78,14 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
-      case .onTapUpdateItemState(let categoryId, let todoId):
+      case .onTapUpdateItemStatus(let categoryId, let todoId):
         state.fetchUpdateTodoItemStatus.isLoading = true
         return sideEffect
           .updateTodoItemStatus(categoryId, todoId)
           .cancellable(pageID: state.id, id: CancelID.requestUpdateToItemStatus, cancelInFlight: true)
 
       case .fetchUpdateTodoItemStatus(let result):
-        state.fetchUpdateTodoItemStatus.isLoading = true
+        state.fetchUpdateTodoItemStatus.isLoading = false
         switch result {
         case .success(let item):
           state.todoItemList = state.todoItemList.mutate(item: item)
@@ -155,7 +155,7 @@ extension TodoListDetailReducer {
     case getTodoItemList
     case fetchTodoItemList(Result<[TodoListEntity.TodoItem.Item], CompositeErrorRepository>)
 
-    case onTapUpdateItemState(String, String)
+    case onTapUpdateItemStatus(String, String)
     case fetchUpdateTodoItemStatus(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
     case onTapTodoItem(TodoListEntity.TodoItem.Item)
