@@ -19,4 +19,6 @@ public protocol TodoListUseCase: Sendable {
   var updateMemo: (String, String, String, String) async throws -> TodoListEntity.TodoItem.Item { get }
 
   var deleteTodoItem: (TodoListEntity.TodoItem.Item) async throws -> Bool { get }
+
+  var editTodoItemTitle: (TodoListEntity.TodoItem.Item, String) async throws -> TodoListEntity.TodoItem.Item { get }
 }

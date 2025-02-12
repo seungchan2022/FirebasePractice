@@ -69,6 +69,19 @@ extension TodoListDetailSideEffect {
     }
   }
 
+  var editTodoItemTitle: (TodoListEntity.TodoItem.Item, String) -> Effect<TodoListDetailReducer.Action> {
+    { item, newTitle in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.todoListUseCase.editTodoItemTitle(item, newTitle)
+          await send(TodoListDetailReducer.Action.fetchEditTodoItemTitle(.success(response)))
+        } catch {
+          await send(TodoListDetailReducer.Action.fetchEditTodoItemTitle(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var deleteTodoItem: (TodoListEntity.TodoItem.Item) -> Effect<TodoListDetailReducer.Action> {
     { item in
       .run { send in

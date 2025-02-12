@@ -95,6 +95,24 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapEditTodoItemTitle(let item, let newTitle):
+        state.fetchEditTodoItemTitle.isLoading = true
+        return sideEffect
+          .editTodoItemTitle(item, newTitle)
+          .cancellable(pageID: state.id, id: CancelID.requestEditTodoTitle, cancelInFlight: true)
+
+      case .fetchEditTodoItemTitle(let result):
+        state.fetchEditTodoItemTitle.isLoading = false
+        switch result {
+        case .success(let item):
+          state.fetchEditTodoItemTitle.value = item
+          state.todoItemList = state.todoItemList.mutate(item: item)
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .onTapDeleteTodoItem(let item):
         state.fetchDeleteTodoItem.isLoading = true
         return sideEffect
@@ -154,6 +172,10 @@ extension TodoListDetailReducer {
     var todoTitleText = ""
     var isShowAlert = false
 
+    var todoItem: TodoListEntity.TodoItem.Item? = .none
+    var newTodoTitleText = ""
+    var isShowEditAlert = false
+
     var todoItemList: [TodoListEntity.TodoItem.Item] = []
 
     var fetchCategoryItem: FetchState.Data<TodoListEntity.Category.Item?> = .init(isLoading: false, value: .none)
@@ -162,6 +184,7 @@ extension TodoListDetailReducer {
     var fetchTodoItemList: FetchState.Data<[TodoListEntity.TodoItem.Item]?> = .init(isLoading: false, value: .none)
 
     var fetchUpdateTodoItemStatus: FetchState.Data<TodoListEntity.TodoItem.Item?> = .init(isLoading: false, value: .none)
+    var fetchEditTodoItemTitle: FetchState.Data<TodoListEntity.TodoItem.Item?> = .init(isLoading: false, value: .none)
 
     var fetchDeleteTodoItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
 
@@ -183,6 +206,9 @@ extension TodoListDetailReducer {
     case onTapUpdateItemStatus(String, String)
     case fetchUpdateTodoItemStatus(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
+    case onTapEditTodoItemTitle(TodoListEntity.TodoItem.Item, String)
+    case fetchEditTodoItemTitle(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
+
     case onTapDeleteTodoItem(TodoListEntity.TodoItem.Item)
     case fetchDeleteTodoItem(Result<Bool, CompositeErrorRepository>)
 
@@ -202,6 +228,7 @@ extension TodoListDetailReducer {
     case requestTodoItemList
     case requestUpdateToItemStatus
     case requestDeleteTodoItem
+    case requestEditTodoTitle
   }
 }
 

@@ -136,6 +136,19 @@ extension TodoListUseCasePlatform: TodoListUseCase {
       }
     }
   }
+
+  public var editTodoItemTitle: (TodoListEntity.TodoItem.Item, String) async throws -> TodoListEntity.TodoItem.Item {
+    { item, newTitle in
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+      do {
+        try await editTodoItemTitle(uid: me.uid, categoryId: item.categoryId, todoId: item.id, newTitle: newTitle)
+        return try await getTodoItem(me.uid, item.categoryId, item.id)
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension TodoListUseCasePlatform {
@@ -205,5 +218,20 @@ extension TodoListUseCasePlatform {
       .collection("todo_list")
       .document(todoId)
       .delete()
+  }
+
+  private func editTodoItemTitle(uid: String, categoryId: String, todoId: String, newTitle: String) async throws {
+    let data: [String: Any] = [
+      "title" : newTitle,
+    ]
+
+    try await Firestore.firestore()
+      .collection("users")
+      .document(uid)
+      .collection("category_list")
+      .document(categoryId)
+      .collection("todo_list")
+      .document(todoId)
+      .updateData(data)
   }
 }
