@@ -28,12 +28,11 @@ extension TodoSideEffect {
     }
   }
 
-  var updateMemo: (String, String, String) -> Effect<TodoReducer.Action> {
-    { categorId, todoId, memoText in
+  var updateMemo: (TodoListEntity.TodoItem.Item, String) -> Effect<TodoReducer.Action> {
+    { item, memoText in
       .run { send in
         do {
-          let user = try useCaseGroup.authUseCase.me()
-          let response = try await useCaseGroup.todoListUseCase.updateMemo(user.uid, categorId, todoId, memoText)
+          let response = try await useCaseGroup.todoListUseCase.updateMemo(item, memoText)
           await send(TodoReducer.Action.fetchUpdateMemo(.success(response)))
         } catch {
           await send(TodoReducer.Action.fetchUpdateMemo(.failure(.other(error))))

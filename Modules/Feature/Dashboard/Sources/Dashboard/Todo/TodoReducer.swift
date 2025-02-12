@@ -37,10 +37,10 @@ struct TodoReducer {
           return .run { await $0(.throwError(error)) }
         }
 
-      case .onTapUpdateMemo(let categoryId, let todoId):
+      case .onTapUpdateMemo(let item):
         state.fetchUpdateMemo.isLoading = true
         return sideEffect
-          .updateMemo(categoryId, todoId, state.memoText)
+          .updateMemo(item, state.memoText)
           .cancellable(pageID: state.id, id: CancelID.requestUpdateMemo, cancelInFlight: true)
 
       case .fetchUpdateMemo(let result):
@@ -96,7 +96,7 @@ extension TodoReducer {
     case getTodoItem(TodoListEntity.TodoItem.Item)
     case fetchTodoItem(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
-    case onTapUpdateMemo(String, String)
+    case onTapUpdateMemo(TodoListEntity.TodoItem.Item)
     case fetchUpdateMemo(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
     case onTapClose

@@ -81,7 +81,7 @@ extension TodoPage: View {
             role: .destructive,
             action: {
               store.memoText = ""
-              store.send(.onTapUpdateMemo(store.todoItem.categoryId, store.todoItem.id))
+              store.send(.onTapUpdateMemo(store.todoItem))
               store.send(.onTapClose)
             }) {
               Text("삭제")
@@ -96,7 +96,7 @@ extension TodoPage: View {
 
       ToolbarItem(placement: .topBarTrailing) {
         Button(action: {
-          store.send(.onTapUpdateMemo(store.todoItem.categoryId, store.todoItem.id))
+          store.send(.onTapUpdateMemo(store.todoItem))
           store.send(.onTapClose)
         }) {
           Text("메모 설정")

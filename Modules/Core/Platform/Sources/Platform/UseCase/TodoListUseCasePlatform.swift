@@ -113,11 +113,13 @@ extension TodoListUseCasePlatform: TodoListUseCase {
     }
   }
 
-  public var updateMemo: (String, String, String, String) async throws -> TodoListEntity.TodoItem.Item {
-    { uid, categoryId, todoId, memoText in
+  public var updateMemo: (TodoListEntity.TodoItem.Item, String) async throws -> TodoListEntity.TodoItem.Item {
+    { item, memoText in
+
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
       do {
-        try await updateMemo(uid: uid, categoryId: categoryId, todoId: todoId, memoText: memoText)
-        return try await getTodoItem(uid, categoryId, todoId)
+        try await updateMemo(uid: me.uid, categoryId: item.categoryId, todoId: item.id, memoText: memoText)
+        return try await getTodoItem(me.uid, item.categoryId, item.id)
       } catch {
         throw CompositeErrorRepository.other(error)
       }
