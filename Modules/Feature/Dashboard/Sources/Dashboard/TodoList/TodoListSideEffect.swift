@@ -39,6 +39,19 @@ extension TodoListSideEffect {
     }
   }
 
+  var deleteCategoryItem: (TodoListEntity.Category.Item) -> Effect<TodoListReducer.Action> {
+    { item in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.todoListUseCase.deleteCategoryItem(item)
+          await send(TodoListReducer.Action.fetchDeleteCategoryItem(.success(response)))
+        } catch {
+          await send(TodoListReducer.Action.fetchDeleteCategoryItem(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToDetail: (TodoListEntity.Category.Item) -> Void {
     { item in
       navigator.next(

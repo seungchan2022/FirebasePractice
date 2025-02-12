@@ -155,13 +155,25 @@ extension TodoListUseCasePlatform: TodoListUseCase {
       }
     }
   }
+
+  public var deleteCategoryItem: (TodoListEntity.Category.Item) async throws -> Bool {
+    { item in
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+      do {
+        try await deleteCategoryItem(uid: me.uid, categoryId: item.id)
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
 }
 
 extension TodoListUseCasePlatform {
 
-  // MARK: Internal
-
-  func addCategoryItem(uid: String, item: TodoListEntity.Category.Item) async throws {
+  private func addCategoryItem(uid: String, item: TodoListEntity.Category.Item) async throws {
     let docRef = Firestore.firestore()
       .collection("users")
       .document(uid)
@@ -171,7 +183,7 @@ extension TodoListUseCasePlatform {
     try docRef.setData(from: item, merge: true)
   }
 
-  func addTodoItem(uid: String, categoryId: String, item: TodoListEntity.TodoItem.Item) async throws {
+  private func addTodoItem(uid: String, categoryId: String, item: TodoListEntity.TodoItem.Item) async throws {
     let docRef = Firestore.firestore()
       .collection("users")
       .document(uid)
@@ -183,7 +195,7 @@ extension TodoListUseCasePlatform {
     try docRef.setData(from: item, merge: true)
   }
 
-  func updateTodoItemStatus(uid: String, categoryId: String, todoId: String, isCompleted: Bool) async throws {
+  private func updateTodoItemStatus(uid: String, categoryId: String, todoId: String, isCompleted: Bool) async throws {
     let data: [String: Any] = [
       "is_completed" : isCompleted,
     ]
@@ -198,7 +210,7 @@ extension TodoListUseCasePlatform {
       .updateData(data)
   }
 
-  func updateMemo(uid: String, categoryId: String, todoId: String, memoText: String) async throws {
+  private func updateMemo(uid: String, categoryId: String, todoId: String, memoText: String) async throws {
     let data: [String: Any] = [
       "memo": memoText,
     ]
@@ -212,8 +224,6 @@ extension TodoListUseCasePlatform {
       .document(todoId)
       .updateData(data)
   }
-
-  // MARK: Private
 
   private func deleteTodoItem(uid: String, categoryId: String, todoId: String) async throws {
     try await Firestore.firestore()
@@ -240,4 +250,37 @@ extension TodoListUseCasePlatform {
       .document(todoId)
       .updateData(data)
   }
+
+  private func deleteCategoryItem(uid: String, categoryId: String) async throws {
+    let db = Firestore.firestore()
+
+    let todoListRef = db
+      .collection("users")
+      .document(uid)
+      .collection("category_list")
+      .document(categoryId)
+      .collection("todo_list")
+
+    let categoryItemRef = db
+      .collection("users")
+      .document(uid)
+      .collection("category_list")
+      .document(categoryId)
+
+    do {
+      let snapshot = try await todoListRef.getDocuments()
+      let batch = db.batch()
+
+      for document in snapshot.documents {
+        batch.deleteDocument(document.reference)
+      }
+
+      batch.deleteDocument(categoryItemRef)
+
+      try await batch.commit()
+    } catch {
+      throw CompositeErrorRepository.other(error)
+    }
+  }
+
 }

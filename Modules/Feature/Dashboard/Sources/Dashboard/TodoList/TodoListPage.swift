@@ -24,7 +24,7 @@ extension TodoListPage: View {
           ItemComponent(
             viewState: .init(item: item),
             tapAction: { store.send(.onTapCategoryItem($0)) },
-            deleteAction: { },
+            deleteAction: { store.send(.onTapDeleteCategoryItem($0)) },
             editAction: { },
             shareAction: { })
         }

@@ -9,7 +9,7 @@ extension TodoListPage {
     let viewState: ViewState
     let tapAction: (TodoListEntity.Category.Item) -> Void
 
-    let deleteAction: () -> Void
+    let deleteAction: (TodoListEntity.Category.Item) -> Void
     let editAction: () -> Void
     let shareAction: () -> Void
   }
@@ -60,7 +60,7 @@ extension TodoListPage.ItemComponent: View {
               }
             }
 
-            Button(role: .destructive, action: { deleteAction() }) {
+            Button(role: .destructive, action: { deleteAction(viewState.item) }) {
               HStack {
                 Text("삭제")
                 Image(systemName: "trash")

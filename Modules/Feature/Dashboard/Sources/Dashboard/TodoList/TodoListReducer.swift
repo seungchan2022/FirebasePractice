@@ -61,6 +61,31 @@ struct TodoListReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapDeleteCategoryItem(let item):
+        state.fetchDeleteCategoryItem.isLoading = true
+
+        return sideEffect
+          .deleteCategoryItem(item)
+          .cancellable(pageID: state.id, id: CancelID.requestDeleteCategoryItem, cancelInFlight: true)
+
+      case .fetchDeleteCategoryItem(let result):
+        state.fetchDeleteCategoryItem.isLoading = false
+        switch result {
+        case .success(let status):
+          switch status {
+          case true:
+            sideEffect.useCaseGroup.toastViewModel.send(message: "성공")
+            return .run { await $0(.getCategoryItemList) }
+
+          case false: sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "실패")
+          }
+
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .onTapCategoryItem(let item):
         sideEffect.routeToDetail(item)
         return .none
@@ -89,6 +114,8 @@ extension TodoListReducer {
 
     var fetchAddCategoryItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
     var fetchCategoryItemList: FetchState.Data<[TodoListEntity.Category.Item]?> = .init(isLoading: false, value: .none)
+
+    var fetchDeleteCategoryItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -100,6 +127,9 @@ extension TodoListReducer {
 
     case getCategoryItemList
     case fetchCategoryItemList(Result<[TodoListEntity.Category.Item], CompositeErrorRepository>)
+
+    case onTapDeleteCategoryItem(TodoListEntity.Category.Item)
+    case fetchDeleteCategoryItem(Result<Bool, CompositeErrorRepository>)
 
     case onTapCategoryItem(TodoListEntity.Category.Item)
 
@@ -115,5 +145,6 @@ extension TodoListReducer {
     case requestAddCategory
     case requestAddCategoryItem
     case requestCategoryItemList
+    case requestDeleteCategoryItem
   }
 }
