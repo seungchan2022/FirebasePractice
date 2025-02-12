@@ -52,6 +52,19 @@ extension TodoListSideEffect {
     }
   }
 
+  var editCategoryItemTitle: (TodoListEntity.Category.Item, String) -> Effect<TodoListReducer.Action> {
+    { item, newTitle in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.todoListUseCase.editCategoryItemTitle(item, newTitle)
+          await send(TodoListReducer.Action.fetchEditCategoryItemTitle(.success(response)))
+        } catch {
+          await send(TodoListReducer.Action.fetchEditCategoryItemTitle(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToDetail: (TodoListEntity.Category.Item) -> Void {
     { item in
       navigator.next(

@@ -86,6 +86,24 @@ struct TodoListReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapEditCategoryItemTitle(let item):
+        state.fetchEditCategoryItemTitle.isLoading = true
+        return sideEffect
+          .editCategoryItemTitle(item, state.newCategoryTitleText)
+          .cancellable(pageID: state.id, id: CancelID.requestEditCategoryItemTitle, cancelInFlight: true)
+
+      case .fetchEditCategoryItemTitle(let result):
+        state.fetchEditCategoryItemTitle.isLoading = false
+        switch result {
+        case .success(let item):
+          state.fetchEditCategoryItemTitle.value = item
+          state.categoryItemList = state.categoryItemList.mutate(item: item)
+          return .none
+
+        case .failure(let error):
+          return .run { await $0(.throwError(error)) }
+        }
+
       case .onTapCategoryItem(let item):
         sideEffect.routeToDetail(item)
         return .none
@@ -101,14 +119,23 @@ struct TodoListReducer {
 extension TodoListReducer {
   @ObservableState
   struct State: Equatable, Identifiable, Sendable {
-    let id: UUID
+
+    // MARK: Lifecycle
 
     init(id: UUID = UUID()) {
       self.id = id
     }
 
+    // MARK: Internal
+
+    let id: UUID
+
     var categoryText = ""
     var isShowAlert = false
+
+    var categoryItem: TodoListEntity.Category.Item? = .none
+    var newCategoryTitleText = ""
+    var isShowEditAlert = false
 
     var categoryItemList: [TodoListEntity.Category.Item] = []
 
@@ -116,6 +143,8 @@ extension TodoListReducer {
     var fetchCategoryItemList: FetchState.Data<[TodoListEntity.Category.Item]?> = .init(isLoading: false, value: .none)
 
     var fetchDeleteCategoryItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+    var fetchEditCategoryItemTitle: FetchState.Data<TodoListEntity.Category.Item?> = .init(isLoading: false, value: .none)
+
   }
 
   enum Action: Equatable, BindableAction, Sendable {
@@ -130,6 +159,9 @@ extension TodoListReducer {
 
     case onTapDeleteCategoryItem(TodoListEntity.Category.Item)
     case fetchDeleteCategoryItem(Result<Bool, CompositeErrorRepository>)
+
+    case onTapEditCategoryItemTitle(TodoListEntity.Category.Item)
+    case fetchEditCategoryItemTitle(Result<TodoListEntity.Category.Item, CompositeErrorRepository>)
 
     case onTapCategoryItem(TodoListEntity.Category.Item)
 
@@ -146,5 +178,12 @@ extension TodoListReducer {
     case requestAddCategoryItem
     case requestCategoryItemList
     case requestDeleteCategoryItem
+    case requestEditCategoryItemTitle
+  }
+}
+
+extension [TodoListEntity.Category.Item] {
+  fileprivate func mutate(item: TodoListEntity.Category.Item) -> Self {
+    self.map { $0.id == item.id ? item : $0 }
   }
 }

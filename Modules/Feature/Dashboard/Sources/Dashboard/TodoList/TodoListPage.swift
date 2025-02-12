@@ -12,6 +12,15 @@ extension TodoListPage {
   private var isActive: Bool {
     store.categoryText.isEmpty ? true : false
   }
+
+  @MainActor
+  private var isActiveButton: Bool {
+    guard
+      let item = store.categoryItem,
+      let currentItem = store.categoryItemList.first(where: { $0.id == item.id })
+    else { return true }
+    return store.newCategoryTitleText.isEmpty || store.newCategoryTitleText == currentItem.title
+  }
 }
 
 // MARK: View
@@ -25,7 +34,11 @@ extension TodoListPage: View {
             viewState: .init(item: item),
             tapAction: { store.send(.onTapCategoryItem($0)) },
             deleteAction: { store.send(.onTapDeleteCategoryItem($0)) },
-            editAction: { },
+            editAction: {
+              store.isShowEditAlert = true
+              store.categoryItem = item
+              store.categoryText = item.title
+            },
             shareAction: { })
         }
       }
@@ -36,6 +49,34 @@ extension TodoListPage: View {
         AddCategoryComponent(viewState: .init(), store: store)
       }
     }
+    .alert(
+      "수정",
+      isPresented: $store.isShowEditAlert,
+      actions: {
+        TextField("타이틀 설정", text: $store.newCategoryTitleText)
+          .autocorrectionDisabled(true)
+          .textInputAutocapitalization(.never)
+
+        Button(action: {
+          store.isShowEditAlert = false
+          store.categoryItem = .none
+          store.newCategoryTitleText = ""
+        }) {
+          Text("취소")
+            .foregroundStyle(.red)
+        }
+
+        Button(action: {
+          if let item = store.categoryItem {
+            store.send(.onTapEditCategoryItemTitle(item))
+          }
+          store.categoryItem = .none
+          store.newCategoryTitleText = ""
+        }) {
+          Text("확인")
+        }
+        .disabled(isActiveButton)
+      })
     .onAppear {
       store.send(.getCategoryItemList)
     }

@@ -19,8 +19,8 @@ extension TodoPage {
 extension TodoPage.ItemComponent {
   @MainActor
   private var isActiveButton: Bool {
-    !store.memoText.isEmpty
-      || store.memoText != (store.fetchTodoItem.value?.memo ?? "")
+    store.memoText.isEmpty
+      || store.memoText == (store.fetchTodoItem.value?.memo ?? "")
   }
 }
 
@@ -107,9 +107,9 @@ extension TodoPage.ItemComponent: View {
             .frame(maxWidth: .infinity)
             .background(.blue)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .opacity(isActiveButton ? 1.0 : 0.3)
+            .opacity(!isActiveButton ? 1.0 : 0.3)
         }
-        .disabled(!isActiveButton)
+        .disabled(isActiveButton)
       }
       .padding(.horizontal, 16)
     }
