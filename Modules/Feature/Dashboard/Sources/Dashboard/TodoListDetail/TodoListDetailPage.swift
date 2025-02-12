@@ -30,7 +30,7 @@ extension TodoListDetailPage: View {
             viewState: .init(item: item),
             tapAction: { store.send(.onTapTodoItem($0)) },
             updateAction: {
-              store.send(.onTapUpdateItemStatus(item.categoryId, item.id))
+              store.send(.onTapUpdateItemStatus(item))
             },
             deleteAction: { store.send(.onTapDeleteTodoItem($0)) },
             editAction: {
@@ -70,7 +70,7 @@ extension TodoListDetailPage: View {
 
         Button(action: {
           if let item = store.todoItem {
-            store.send(.onTapEditTodoItemTitle(item, store.newTodoTitleText))
+            store.send(.onTapEditTodoItemTitle(item))
           }
           store.todoItem = .none
           store.newTodoTitleText = ""

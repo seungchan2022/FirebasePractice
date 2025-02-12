@@ -53,14 +53,11 @@ extension TodoListDetailSideEffect {
     }
   }
 
-  var updateTodoItemStatus: (String, String) -> Effect<TodoListDetailReducer.Action> {
-    { categoryId, todoId in
+  var updateTodoItemStatus: (TodoListEntity.TodoItem.Item) -> Effect<TodoListDetailReducer.Action> {
+    { item in
       .run { send in
         do {
-          let user = try useCaseGroup.authUseCase.me()
-          let todoItem = try await useCaseGroup.todoListUseCase.getTodoItem(user.uid, categoryId, todoId)
-          let currentValue = todoItem.isCompleted ?? false
-          let response = try await useCaseGroup.todoListUseCase.updateTodoItemStatus(user.uid, categoryId, todoId, !currentValue)
+          let response = try await useCaseGroup.todoListUseCase.updateTodoItemStatus(item, !(item.isCompleted ?? false))
           await send(TodoListDetailReducer.Action.fetchUpdateTodoItemStatus(.success(response)))
         } catch {
           await send(TodoListDetailReducer.Action.fetchUpdateTodoItemStatus(.failure(.other(error))))

@@ -78,10 +78,10 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
-      case .onTapUpdateItemStatus(let categoryId, let todoId):
+      case .onTapUpdateItemStatus(let item):
         state.fetchUpdateTodoItemStatus.isLoading = true
         return sideEffect
-          .updateTodoItemStatus(categoryId, todoId)
+          .updateTodoItemStatus(item)
           .cancellable(pageID: state.id, id: CancelID.requestUpdateToItemStatus, cancelInFlight: true)
 
       case .fetchUpdateTodoItemStatus(let result):
@@ -95,10 +95,10 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
-      case .onTapEditTodoItemTitle(let item, let newTitle):
+      case .onTapEditTodoItemTitle(let item):
         state.fetchEditTodoItemTitle.isLoading = true
         return sideEffect
-          .editTodoItemTitle(item, newTitle)
+          .editTodoItemTitle(item, state.newTodoTitleText)
           .cancellable(pageID: state.id, id: CancelID.requestEditTodoTitle, cancelInFlight: true)
 
       case .fetchEditTodoItemTitle(let result):
@@ -203,10 +203,10 @@ extension TodoListDetailReducer {
     case getTodoItemList
     case fetchTodoItemList(Result<[TodoListEntity.TodoItem.Item], CompositeErrorRepository>)
 
-    case onTapUpdateItemStatus(String, String)
+    case onTapUpdateItemStatus(TodoListEntity.TodoItem.Item)
     case fetchUpdateTodoItemStatus(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
-    case onTapEditTodoItemTitle(TodoListEntity.TodoItem.Item, String)
+    case onTapEditTodoItemTitle(TodoListEntity.TodoItem.Item)
     case fetchEditTodoItemTitle(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
     case onTapDeleteTodoItem(TodoListEntity.TodoItem.Item)

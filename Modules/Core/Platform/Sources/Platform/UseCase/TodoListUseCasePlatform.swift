@@ -102,11 +102,15 @@ extension TodoListUseCasePlatform: TodoListUseCase {
     }
   }
 
-  public var updateTodoItemStatus: (String, String, String, Bool) async throws -> TodoListEntity.TodoItem.Item {
-    { uid, categoryId, todoId, isCompleted in
+  public var updateTodoItemStatus: (TodoListEntity.TodoItem.Item, Bool) async throws -> TodoListEntity.TodoItem.Item {
+    { item, isCompleted in
+
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
       do {
-        try await updateTodoItemStatus(uid: uid, categoryId: categoryId, todoId: todoId, isCompleted: isCompleted)
-        return try await getTodoItem(uid, categoryId, todoId)
+        try await updateTodoItemStatus(uid: me.uid, categoryId: item.categoryId, todoId: item.id, isCompleted: isCompleted)
+        return try await getTodoItem(me.uid, item.categoryId, item.id)
+
       } catch {
         throw CompositeErrorRepository.other(error)
       }
