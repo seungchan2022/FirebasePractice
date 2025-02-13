@@ -12,7 +12,12 @@ extension TodoListDetailPage {
   }
 }
 
-extension TodoListDetailPage.AddTodoItemComponent { }
+extension TodoListDetailPage.AddTodoItemComponent {
+  @MainActor
+  private var isActive: Bool {
+    store.todoTitleText.isEmpty ? true : false
+  }
+}
 
 // MARK: - TodoListDetailPage.AddTodoItemComponent + View
 
@@ -39,6 +44,7 @@ extension TodoListDetailPage.AddTodoItemComponent: View {
       }) {
         Text("확인")
       }
+      .disabled(isActive)
 
       Button(role: .cancel, action: {
         store.todoTitleText = ""

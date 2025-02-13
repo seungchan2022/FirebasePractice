@@ -98,7 +98,7 @@ struct TodoListDetailReducer {
       case .onTapEditTodoItemTitle(let item):
         state.fetchEditTodoItemTitle.isLoading = true
         return sideEffect
-          .editTodoItemTitle(item, state.newTodoTitleText)
+          .editTodoItemTitle(item, state.todoTitleText)
           .cancellable(pageID: state.id, id: CancelID.requestEditTodoTitle, cancelInFlight: true)
 
       case .fetchEditTodoItemTitle(let result):
@@ -173,7 +173,6 @@ extension TodoListDetailReducer {
     var isShowAlert = false
 
     var todoItem: TodoListEntity.TodoItem.Item? = .none
-    var newTodoTitleText = ""
     var isShowEditAlert = false
 
     var todoItemList: [TodoListEntity.TodoItem.Item] = []

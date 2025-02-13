@@ -12,7 +12,12 @@ extension TodoListPage {
   }
 }
 
-extension TodoListPage.AddCategoryComponent { }
+extension TodoListPage.AddCategoryComponent {
+  @MainActor
+  private var isActive: Bool {
+    store.categoryText.isEmpty ? true : false
+  }
+}
 
 // MARK: - TodoListPage.AddCategoryComponent + View
 
@@ -35,6 +40,7 @@ extension TodoListPage.AddCategoryComponent: View {
       }) {
         Text("확인")
       }
+      .disabled(isActive)
 
       Button(role: .cancel, action: {
         store.categoryText = ""

@@ -9,17 +9,12 @@ struct TodoListPage {
 
 extension TodoListPage {
   @MainActor
-  private var isActive: Bool {
-    store.categoryText.isEmpty ? true : false
-  }
-
-  @MainActor
   private var isActiveButton: Bool {
     guard
       let item = store.categoryItem,
       let currentItem = store.categoryItemList.first(where: { $0.id == item.id })
     else { return true }
-    return store.newCategoryTitleText.isEmpty || store.newCategoryTitleText == currentItem.title
+    return store.categoryText.isEmpty || store.categoryText == currentItem.title
   }
 }
 
@@ -53,14 +48,14 @@ extension TodoListPage: View {
       "수정",
       isPresented: $store.isShowEditAlert,
       actions: {
-        TextField("타이틀 설정", text: $store.newCategoryTitleText)
+        TextField("타이틀 설정", text: $store.categoryText)
           .autocorrectionDisabled(true)
           .textInputAutocapitalization(.never)
 
         Button(action: {
           store.isShowEditAlert = false
           store.categoryItem = .none
-          store.newCategoryTitleText = ""
+          store.categoryText = ""
         }) {
           Text("취소")
             .foregroundStyle(.red)
@@ -71,7 +66,7 @@ extension TodoListPage: View {
             store.send(.onTapEditCategoryItemTitle(item))
           }
           store.categoryItem = .none
-          store.newCategoryTitleText = ""
+          store.categoryText = ""
         }) {
           Text("확인")
         }

@@ -89,7 +89,7 @@ struct TodoListReducer {
       case .onTapEditCategoryItemTitle(let item):
         state.fetchEditCategoryItemTitle.isLoading = true
         return sideEffect
-          .editCategoryItemTitle(item, state.newCategoryTitleText)
+          .editCategoryItemTitle(item, state.categoryText)
           .cancellable(pageID: state.id, id: CancelID.requestEditCategoryItemTitle, cancelInFlight: true)
 
       case .fetchEditCategoryItemTitle(let result):
@@ -134,7 +134,6 @@ extension TodoListReducer {
     var isShowAlert = false
 
     var categoryItem: TodoListEntity.Category.Item? = .none
-    var newCategoryTitleText = ""
     var isShowEditAlert = false
 
     var categoryItemList: [TodoListEntity.Category.Item] = []
