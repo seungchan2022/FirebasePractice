@@ -18,5 +18,6 @@ extension Link.Dashboard {
     case todoList
     case todoListDetail
     case todo
+    case group
   }
 }

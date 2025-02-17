@@ -37,6 +37,13 @@ extension AppMain: View {
             items: .none),
           prefersLargeTitles: true),
         .init(
+          tag: 4,
+          tabItem: .init(title: "Group", image: UIImage(systemName: "person.3"), tag: 4),
+          linkItem: .init(
+            path: Link.Dashboard.Path.group.rawValue,
+            items: .none),
+          prefersLargeTitles: true),
+        .init(
           tag: 2,
           tabItem: .init(title: "Profile", image: UIImage(systemName: "person"), tag: 2),
           linkItem: .init(

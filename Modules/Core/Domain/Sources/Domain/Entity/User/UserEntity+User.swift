@@ -23,7 +23,8 @@ extension UserEntity.User {
       wishList: [String]? = .none,
       movie: UserEntity.Movie.Item? = .none,
       profileImagePath: String?,
-      profileImagePathURL: String?)
+      profileImagePathURL: String?,
+      groupList: [String]? = .none)
     {
       self.uid = uid
       self.email = email
@@ -35,6 +36,7 @@ extension UserEntity.User {
       self.movie = movie
       self.profileImagePath = profileImagePath
       self.profileImagePathURL = profileImagePathURL
+      self.groupList = groupList
     }
 
     // MARK: Public
@@ -49,6 +51,7 @@ extension UserEntity.User {
     public let movie: UserEntity.Movie.Item?
     public let profileImagePath: String?
     public let profileImagePathURL: String?
+    public let groupList: [String]?
 
     // MARK: Private
 
@@ -63,6 +66,7 @@ extension UserEntity.User {
       case movie
       case profileImagePath = "profile_image_path"
       case profileImagePathURL = "profile_image_path_url"
+      case groupList = "group_list"
     }
   }
 }

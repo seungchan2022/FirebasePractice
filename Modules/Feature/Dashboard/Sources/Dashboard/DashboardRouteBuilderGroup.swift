@@ -19,6 +19,7 @@ extension DashboardRouteBuilderGroup {
       TodoListRouteBuilder.generate(),
       TodoListDetailRouteBuilder.generate(),
       TodoRouteBuilder.generate(),
+      GroupRouteBuilder.generate(),
     ]
   }
 }
