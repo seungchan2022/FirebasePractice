@@ -37,23 +37,19 @@ struct TodoListDetailReducer {
           return .run { await $0(.throwError(error)) }
         }
 
-      case .onTapAddTodoItem(let item):
+      case .onTapAddTodoItem(let categoryId, let itemName):
         state.fetchAddTodoItem.isLoading = true
         return sideEffect
-          .addTodoItem(item)
+          .addTodoItem(categoryId, itemName)
           .cancellable(pageID: state.id, id: CancelID.requestAddTodoItem, cancelInFlight: true)
 
       case .fetchAddTodoItem(let result):
         state.fetchAddTodoItem.isLoading = false
         switch result {
-        case .success(let status):
-          switch status {
-          case true:
-            sideEffect.useCaseGroup.toastViewModel.send(message: "성공")
-            return .run { await $0(.getTodoItemList) }
-
-          case false: sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "실패")
-          }
+        case .success(let item):
+          state.fetchAddTodoItem.value = item
+          state.todoItem = item
+          state.todoItemList = state.todoItemList + [item]
           return .none
 
         case .failure(let error):
@@ -179,7 +175,8 @@ extension TodoListDetailReducer {
 
     var fetchCategoryItem: FetchState.Data<TodoListEntity.Category.Item?> = .init(isLoading: false, value: .none)
 
-    var fetchAddTodoItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+    var fetchAddTodoItem: FetchState.Data<TodoListEntity.TodoItem.Item?> = .init(isLoading: false, value: .none)
+
     var fetchTodoItemList: FetchState.Data<[TodoListEntity.TodoItem.Item]?> = .init(isLoading: false, value: .none)
 
     var fetchUpdateTodoItemStatus: FetchState.Data<TodoListEntity.TodoItem.Item?> = .init(isLoading: false, value: .none)
@@ -196,8 +193,8 @@ extension TodoListDetailReducer {
     case getCategoryItem(TodoListEntity.Category.Item)
     case fetchCategoryItem(Result<TodoListEntity.Category.Item, CompositeErrorRepository>)
 
-    case onTapAddTodoItem(TodoListEntity.TodoItem.Item)
-    case fetchAddTodoItem(Result<Bool, CompositeErrorRepository>)
+    case onTapAddTodoItem(String, String)
+    case fetchAddTodoItem(Result<TodoListEntity.TodoItem.Item, CompositeErrorRepository>)
 
     case getTodoItemList
     case fetchTodoItemList(Result<[TodoListEntity.TodoItem.Item], CompositeErrorRepository>)

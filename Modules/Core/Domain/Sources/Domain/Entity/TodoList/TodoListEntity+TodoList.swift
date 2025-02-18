@@ -14,7 +14,7 @@ extension TodoListEntity.Category {
     public let dateCreated: Date
 
     public init(
-      id: String = UUID().uuidString,
+      id: String,
       title: String,
       dateCreated: Date = .now)
     {
@@ -39,7 +39,7 @@ extension TodoListEntity.TodoItem {
     // MARK: Lifecycle
 
     public init(
-      id: String = UUID().uuidString,
+      id: String,
       categoryId: String,
       title: String,
       isCompleted: Bool? = .none,

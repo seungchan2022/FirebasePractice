@@ -35,7 +35,7 @@ extension TodoListPage.AddCategoryComponent: View {
         .textInputAutocapitalization(.never)
 
       Button(action: {
-        store.send(.onTapAddCategoryItem(.init(title: store.categoryText)))
+        store.send(.onTapAddCategoryItem(store.categoryText))
         store.categoryText = ""
       }) {
         Text("확인")

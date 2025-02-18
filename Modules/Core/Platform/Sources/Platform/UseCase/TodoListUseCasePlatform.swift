@@ -13,11 +13,22 @@ public struct TodoListUseCasePlatform {
 
 extension TodoListUseCasePlatform: TodoListUseCase {
 
-  public var addCategoryItem: (String, TodoListEntity.Category.Item) async throws -> Bool {
-    { uid, item in
+  public var addCategoryItem: (String, String) async throws -> TodoListEntity.Category.Item {
+    { uid, categoryName in
       do {
-        try await addCategoryItem(uid: uid, item: item)
-        return true
+        let docRef = Firestore.firestore()
+          .collection("users")
+          .document(uid)
+          .collection("category_list")
+          .document()
+
+        let newItem = TodoListEntity.Category.Item(
+          id: docRef.documentID,
+          title: categoryName)
+
+        try docRef.setData(from: newItem, merge: true)
+
+        return newItem
       } catch {
         throw CompositeErrorRepository.other(error)
       }
@@ -55,11 +66,25 @@ extension TodoListUseCasePlatform: TodoListUseCase {
     }
   }
 
-  public var addTodoItem: (String, String, TodoListEntity.TodoItem.Item) async throws -> Bool {
-    { uid, categoryId, item in
+  public var addTodoItem: (String, String, String) async throws -> TodoListEntity.TodoItem.Item {
+    { uid, categoryId, itemName in
       do {
-        try await addTodoItem(uid: uid, categoryId: categoryId, item: item)
-        return true
+        let docRef = Firestore.firestore()
+          .collection("users")
+          .document(uid)
+          .collection("category_list")
+          .document(categoryId)
+          .collection("todo_list")
+          .document()
+
+        let newItem = TodoListEntity.TodoItem.Item(
+          id: docRef.documentID,
+          categoryId: categoryId,
+          title: itemName)
+
+        try docRef.setData(from: newItem, merge: true)
+
+        return newItem
       } catch {
         throw CompositeErrorRepository.other(error)
       }
@@ -185,29 +210,6 @@ extension TodoListUseCasePlatform: TodoListUseCase {
 }
 
 extension TodoListUseCasePlatform {
-
-  private func addCategoryItem(uid: String, item: TodoListEntity.Category.Item) async throws {
-    let docRef = Firestore.firestore()
-      .collection("users")
-      .document(uid)
-      .collection("category_list")
-      .document(item.id)
-
-    try docRef.setData(from: item, merge: true)
-  }
-
-  private func addTodoItem(uid: String, categoryId: String, item: TodoListEntity.TodoItem.Item) async throws {
-    let docRef = Firestore.firestore()
-      .collection("users")
-      .document(uid)
-      .collection("category_list")
-      .document(categoryId)
-      .collection("todo_list")
-      .document(item.id)
-
-    try docRef.setData(from: item, merge: true)
-  }
-
   private func updateTodoItemStatus(uid: String, categoryId: String, todoId: String, isCompleted: Bool) async throws {
     let data: [String: Any] = [
       "is_completed" : isCompleted,

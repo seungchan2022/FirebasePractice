@@ -25,12 +25,12 @@ extension TodoListDetailSideEffect {
     }
   }
 
-  var addTodoItem: (TodoListEntity.TodoItem.Item) -> Effect<TodoListDetailReducer.Action> {
-    { item in
+  var addTodoItem: (String, String) -> Effect<TodoListDetailReducer.Action> {
+    { categoryId, todoName in
       .run { send in
         do {
           let user = try useCaseGroup.authUseCase.me()
-          let response = try await useCaseGroup.todoListUseCase.addTodoItem(user.uid, item.categoryId, item)
+          let response = try await useCaseGroup.todoListUseCase.addTodoItem(user.uid, categoryId, todoName)
           await send(TodoListDetailReducer.Action.fetchAddTodoItem(.success(response)))
         } catch {
           await send(TodoListDetailReducer.Action.fetchAddTodoItem(.failure(.other(error))))

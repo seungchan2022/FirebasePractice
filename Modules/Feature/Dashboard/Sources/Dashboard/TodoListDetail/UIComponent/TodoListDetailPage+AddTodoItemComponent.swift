@@ -35,11 +35,7 @@ extension TodoListDetailPage.AddTodoItemComponent: View {
         .textInputAutocapitalization(.never)
 
       Button(action: {
-        store.send(
-          .onTapAddTodoItem(
-            .init(
-              categoryId: store.categoryItem.id,
-              title: store.todoTitleText)))
+        store.send(.onTapAddTodoItem(store.categoryItem.id, store.todoTitleText))
         store.todoTitleText = ""
       }) {
         Text("확인")

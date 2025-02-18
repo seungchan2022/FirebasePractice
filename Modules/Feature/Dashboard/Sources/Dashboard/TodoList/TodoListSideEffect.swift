@@ -11,12 +11,13 @@ struct TodoListSideEffect {
 }
 
 extension TodoListSideEffect {
-  var addCategoryItem: (TodoListEntity.Category.Item) -> Effect<TodoListReducer.Action> {
-    { item in
+
+  var addCategoryItem: (String) -> Effect<TodoListReducer.Action> {
+    { categoryName in
       .run { send in
         do {
           let user = try useCaseGroup.authUseCase.me()
-          let response = try await useCaseGroup.todoListUseCase.addCategoryItem(user.uid, item)
+          let response = try await useCaseGroup.todoListUseCase.addCategoryItem(user.uid, categoryName)
           await send(TodoListReducer.Action.fetchAddCategoryItem(.success(response)))
         } catch {
           await send(TodoListReducer.Action.fetchAddCategoryItem(.failure(.other(error))))

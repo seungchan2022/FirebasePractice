@@ -2,13 +2,13 @@ import Foundation
 
 public protocol TodoListUseCase: Sendable {
 
-  var addCategoryItem: (String, TodoListEntity.Category.Item) async throws -> Bool { get }
+  var addCategoryItem: (String, String) async throws -> TodoListEntity.Category.Item { get }
 
   var getCategoryItem: (String, String) async throws -> TodoListEntity.Category.Item { get }
 
   var getCategoryItemList: (String) async throws -> [TodoListEntity.Category.Item] { get }
 
-  var addTodoItem: (String, String, TodoListEntity.TodoItem.Item) async throws -> Bool { get }
+  var addTodoItem: (String, String, String) async throws -> TodoListEntity.TodoItem.Item { get }
 
   var getTodoItem: (String, String, String) async throws -> TodoListEntity.TodoItem.Item { get }
 

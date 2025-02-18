@@ -20,23 +20,19 @@ struct TodoListReducer {
         return .concatenate(
           CancelID.allCases.map { .cancel(pageID: state.id, id: $0) })
 
-      case .onTapAddCategoryItem(let item):
+      case .onTapAddCategoryItem(let categoryName):
         state.fetchAddCategoryItem.isLoading = true
         return sideEffect
-          .addCategoryItem(item)
+          .addCategoryItem(categoryName)
           .cancellable(pageID: state.id, id: CancelID.requestAddCategoryItem, cancelInFlight: true)
 
       case .fetchAddCategoryItem(let result):
         state.fetchAddCategoryItem.isLoading = false
         switch result {
-        case .success(let status):
-          switch status {
-          case true:
-            sideEffect.useCaseGroup.toastViewModel.send(message: "성공")
-            return .run { await $0(.getCategoryItemList) }
-
-          case false: sideEffect.useCaseGroup.toastViewModel.send(errorMessage: "실패")
-          }
+        case .success(let item):
+          state.fetchAddCategoryItem.value = item
+          state.categoryItem = item
+          state.categoryItemList = state.categoryItemList + [item]
           return .none
 
         case .failure(let error):
@@ -138,7 +134,7 @@ extension TodoListReducer {
 
     var categoryItemList: [TodoListEntity.Category.Item] = []
 
-    var fetchAddCategoryItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
+    var fetchAddCategoryItem: FetchState.Data<TodoListEntity.Category.Item?> = .init(isLoading: false, value: .none)
     var fetchCategoryItemList: FetchState.Data<[TodoListEntity.Category.Item]?> = .init(isLoading: false, value: .none)
 
     var fetchDeleteCategoryItem: FetchState.Data<Bool?> = .init(isLoading: false, value: .none)
@@ -150,8 +146,8 @@ extension TodoListReducer {
     case binding(BindingAction<State>)
     case teardown
 
-    case onTapAddCategoryItem(TodoListEntity.Category.Item)
-    case fetchAddCategoryItem(Result<Bool, CompositeErrorRepository>)
+    case onTapAddCategoryItem(String)
+    case fetchAddCategoryItem(Result<TodoListEntity.Category.Item, CompositeErrorRepository>)
 
     case getCategoryItemList
     case fetchCategoryItemList(Result<[TodoListEntity.Category.Item], CompositeErrorRepository>)
