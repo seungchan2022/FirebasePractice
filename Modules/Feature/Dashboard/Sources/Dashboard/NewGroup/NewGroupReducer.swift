@@ -3,11 +3,11 @@ import ComposableArchitecture
 import Domain
 import Foundation
 
-// MARK: - GroupReducer
+// MARK: - NewGroupReducer
 
 @Reducer
-struct GroupReducer {
-  let sideEffect: GroupSideEffect
+struct NewGroupReducer {
+  let sideEffect: NewGroupSideEffect
 
   var body: some ReducerOf<Self> {
     BindingReducer()
@@ -20,23 +20,27 @@ struct GroupReducer {
         return .concatenate(
           CancelID.allCases.map { .cancel(pageID: state.id, id: $0) })
 
-      case .onTapCreateGroup(let groupName):
-        state.fetchCreateGroup.isLoading = true
+      case .getUserList:
+        state.fetchUserList.isLoading = true
         return sideEffect
-          .createGroup(groupName)
-          .cancellable(pageID: state.id, id: CancelID.requestCreateGroup, cancelInFlight: true)
+          .getUserList()
+          .cancellable(pageID: state.id, id: CancelID.requestUserList, cancelInFlight: true)
 
-      case .fetchCreateGroup(let result):
-        state.fetchCreateGroup.isLoading = false
+      case .fetchUserList(let result):
+        state.fetchUserList.isLoading = false
         switch result {
-        case .success(let item):
-          state.fetchCreateGroup.value = item
-          state.groupItem = item
+        case .success(let itemList):
+          state.fetchUserList.value = itemList
+          state.userList = itemList
           return .none
 
         case .failure(let error):
           return .run { await $0(.throwError(error)) }
         }
+
+      case .routeToClose:
+        sideEffect.routeToClose()
+        return .none
 
       case .throwError(let error):
         sideEffect.useCaseGroup.toastViewModel.send(errorMessage: error.displayMessage)
@@ -46,7 +50,7 @@ struct GroupReducer {
   }
 }
 
-extension GroupReducer {
+extension NewGroupReducer {
   @ObservableState
   struct State: Equatable, Identifiable, Sendable {
     let id: UUID
@@ -55,27 +59,29 @@ extension GroupReducer {
       self.id = id
     }
 
-    var groupItem: GroupEntity.Group.Item? = .none
+    var userList: [UserEntity.User.Response] = []
 
-    var fetchCreateGroup: FetchState.Data<GroupEntity.Group.Item?> = .init(isLoading: false, value: .none)
+    var fetchUserList: FetchState.Data<[UserEntity.User.Response]?> = .init(isLoading: false, value: .none)
   }
 
   enum Action: Equatable, BindableAction, Sendable {
     case binding(BindingAction<State>)
     case teardown
 
-    case onTapCreateGroup(String)
-    case fetchCreateGroup(Result<GroupEntity.Group.Item, CompositeErrorRepository>)
+    case getUserList
+    case fetchUserList(Result<[UserEntity.User.Response], CompositeErrorRepository>)
+
+    case routeToClose
 
     case throwError(CompositeErrorRepository)
   }
 }
 
-// MARK: GroupReducer.CancelID
+// MARK: NewGroupReducer.CancelID
 
-extension GroupReducer {
+extension NewGroupReducer {
   enum CancelID: Equatable, CaseIterable {
     case teardown
-    case requestCreateGroup
+    case requestUserList
   }
 }

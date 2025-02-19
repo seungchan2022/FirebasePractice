@@ -1,31 +1,45 @@
 import ComposableArchitecture
+import Domain
 import SwiftUI
 
-// MARK: - GroupPage
+// MARK: - GroupListPage
 
-struct GroupPage {
-  @Bindable var store: StoreOf<GroupReducer>
+struct GroupListPage {
+  @Bindable var store: StoreOf<GroupListReducer>
 
   @State private var isShowAlert = false
   @State private var groupName = ""
 }
 
+extension GroupListPage {
+  @MainActor
+  private var itemList: [GroupListEntity.Group.Item] {
+    store.groupList.sorted(by: { $0.dateCreated > $1.dateCreated })
+  }
+}
+
 // MARK: View
 
-extension GroupPage: View {
+extension GroupListPage: View {
   var body: some View {
     ScrollView {
-      VStack {
-        Text("Group Page")
+      LazyVStack {
+        ForEach(itemList, id: \.id) { item in
+          Text(item.id)
+          Text(item.name)
+        }
       }
     }
     .toolbar {
       ToolbarItem(placement: .topBarTrailing) {
-        Button(action: { isShowAlert = true }) {
-          Text("추가")
+        Button(action: {
+          store.send(.routeToNewGroup)
+        }) {
+          Image(systemName: "square.and.pencil")
         }
       }
     }
+
     .alert("그룹 설정", isPresented: $isShowAlert) {
       TextField("그룹 이름", text: $groupName)
         .autocorrectionDisabled(true)
@@ -45,6 +59,9 @@ extension GroupPage: View {
       }) {
         Text("취소")
       }
+    }
+    .onAppear {
+      store.send(.getGroupList)
     }
   }
 }

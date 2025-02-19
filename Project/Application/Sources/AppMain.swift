@@ -40,7 +40,7 @@ extension AppMain: View {
           tag: 4,
           tabItem: .init(title: "Group", image: UIImage(systemName: "person.3"), tag: 4),
           linkItem: .init(
-            path: Link.Dashboard.Path.group.rawValue,
+            path: Link.Dashboard.Path.groupList.rawValue,
             items: .none),
           prefersLargeTitles: true),
         .init(

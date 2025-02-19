@@ -1,20 +1,20 @@
 import Architecture
 import LinkNavigator
 
-struct GroupRouteBuilder<RootNavigator: RootNavigatorType> {
+struct NewGroupRouteBuilder<RootNavigator: RootNavigatorType> {
   @MainActor
   static func generate() -> RouteBuilderOf<RootNavigator> {
-    let matchPath = Link.Dashboard.Path.group.rawValue
+    let matchPath = Link.Dashboard.Path.newGroup.rawValue
 
     return .init(matchPath: matchPath) { navigator, _, diContainer -> RouteViewController? in
       guard let env: DashboardSidEffect = diContainer.resolve() else { return .none }
 
       return WrappingController(matchPath: matchPath) {
-        GroupPage(
+        NewGroupPage(
           store: .init(
-            initialState: GroupReducer.State(),
+            initialState: NewGroupReducer.State(),
             reducer: {
-              GroupReducer(
+              NewGroupReducer(
                 sideEffect: .init(
                   useCaseGroup: env,
                   navigator: navigator))

@@ -13,5 +13,5 @@ struct AppSideEffect: DependencyType, DashboardSidEffect {
   let userUseCase: UserUseCase
   let productUseCase: ProductUseCase
   let todoListUseCase: TodoListUseCase
-  let groupUseCase: GroupUseCase
+  let groupListUseCase: GroupListUseCase
 }

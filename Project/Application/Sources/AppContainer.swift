@@ -33,7 +33,7 @@ extension AppContainer {
       userUseCase: UserUseCasePlatform(),
       productUseCase: ProductUseCasePlatform(),
       todoListUseCase: TodoListUseCasePlatform(),
-      groupUseCase: GroupUseCasePlatform())
+      groupListUseCase: GroupListUseCasePlatform())
 
     return .init(
       dependency: sideEffect,
