@@ -180,7 +180,7 @@ extension NewGroupPage {
   @MainActor
   private func trailingItem() -> some ToolbarContent {
     ToolbarItem(placement: .topBarTrailing) {
-      Button(action: { }) {
+      Button(action: { store.send(.onTapNewGroup) }) {
         Text("완료")
           .bold()
       }

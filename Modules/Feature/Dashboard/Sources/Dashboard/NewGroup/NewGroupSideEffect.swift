@@ -25,6 +25,19 @@ extension NewGroupSideEffect {
     }
   }
 
+  var createNewGroup: (String, [UserEntity.User.Response]) -> Effect<NewGroupReducer.Action> {
+    { groupName, memberList in
+      .run { send in
+        do {
+          let response = try await useCaseGroup.groupListUseCase.createNewGroup(groupName, memberList)
+          await send(NewGroupReducer.Action.fetchNewGroup(.success(response)))
+        } catch {
+          await send(NewGroupReducer.Action.fetchNewGroup(.failure(.other(error))))
+        }
+      }
+    }
+  }
+
   var routeToClose: () -> Void {
     {
       navigator.close(isAnimated: true, completeAction: { })

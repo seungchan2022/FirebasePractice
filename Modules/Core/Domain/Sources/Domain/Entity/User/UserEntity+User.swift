@@ -22,8 +22,8 @@ extension UserEntity.User {
       isPremium: Bool? = .none,
       wishList: [String]? = .none,
       movie: UserEntity.Movie.Item? = .none,
-      profileImagePath: String?,
-      profileImagePathURL: String?,
+      profileImagePath: String? = .none,
+      profileImagePathURL: String? = .none,
       groupList: [String]? = .none)
     {
       self.uid = uid

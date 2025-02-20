@@ -93,6 +93,31 @@ extension GroupListUseCasePlatform: GroupListUseCase {
     }
   }
 
+  public var createNewGroup: (String, [UserEntity.User.Response]) async throws -> Bool {
+    { groupName, memberList in
+      guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
+
+      let document = Firestore.firestore()
+        .collection("groups")
+        .document()
+
+      let documentId = document.documentID
+
+      let item = GroupListEntity.Group.Item(
+        id: documentId,
+        name: groupName,
+        memberList: [me.uid] + memberList.map { $0.uid })
+
+      do {
+        try await addGroupId(groupId: item.id, forUsers: [me.serialized()] + memberList)
+        try await createGroup(item: item)
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
 }
 
 extension GroupListUseCasePlatform {
@@ -110,6 +135,21 @@ extension GroupListUseCasePlatform {
       .collection("users")
       .document(me.uid)
       .updateData(data)
+  }
+
+  /// 모든 유저의 group_list에 groupId를 추가
+  func addGroupId(groupId: String, forUsers users: [UserEntity.User.Response]) async throws {
+    for user in users {
+      let data: [String: Any] = [
+        "group_list": FieldValue.arrayUnion([groupId]),
+      ]
+
+      // 각 유저의 Firestore에 group_list 업데이트
+      try await Firestore.firestore()
+        .collection("users")
+        .document(user.uid)
+        .updateData(data)
+    }
   }
 
   func removeGroupId(groupId: String) async throws {
@@ -149,4 +189,10 @@ extension GroupListUseCasePlatform {
     }
   }
 
+}
+
+extension FirebaseAuth.User {
+  fileprivate func serialized() -> UserEntity.User.Response {
+    .init(uid: uid, email: email, userName: displayName, photoURL: photoURL?.absoluteString, created: Date())
+  }
 }
