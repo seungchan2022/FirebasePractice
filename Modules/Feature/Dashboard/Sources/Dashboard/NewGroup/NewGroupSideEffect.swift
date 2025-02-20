@@ -11,12 +11,13 @@ struct NewGroupSideEffect {
 }
 
 extension NewGroupSideEffect {
-  var getUserList: () -> Effect<NewGroupReducer.Action> {
-    {
+
+  var getUserList: (Int, UserEntity.User.Response?) -> Effect<NewGroupReducer.Action> {
+    { limit, item in
       .run { send in
         do {
-          let response = try await useCaseGroup.groupListUseCase.getUserList()
-          await send(NewGroupReducer.Action.fetchUserList(.success(response)))
+          let itemList = try await useCaseGroup.groupListUseCase.getUserList(limit, item)
+          await send(NewGroupReducer.Action.fetchUserList(.success(itemList)))
         } catch {
           await send(NewGroupReducer.Action.fetchUserList(.failure(.other(error))))
         }

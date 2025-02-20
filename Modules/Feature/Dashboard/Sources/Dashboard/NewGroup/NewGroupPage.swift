@@ -8,34 +8,39 @@ import SwiftUI
 struct NewGroupPage {
   @Bindable var store: StoreOf<NewGroupReducer>
 
-  @State private var selectedUserList: [UserEntity.User.Response] = []
-
-  @State private var groupName = ""
 }
 
 extension NewGroupPage {
 
   // MARK: Internal
 
+  @MainActor
   func handleUserSelection(_ user: UserEntity.User.Response) {
-    selectedUserList = isUserSelected(user)
-      ? selectedUserList.filter { $0.uid != user.uid } // 이미 선택된 경우 삭제
-      : selectedUserList + [user] // 선택되지 않은 경우 추가
+    store.selectedUserList = isUserSelected(user)
+      ? store.selectedUserList.filter { $0.uid != user.uid } // 이미 선택된 경우 삭제
+      : store.selectedUserList + [user] // 선택되지 않은 경우 추가
   }
 
+  @MainActor
   func isUserSelected(_ user: UserEntity.User.Response) -> Bool {
-    selectedUserList.contains { $0.uid == user.uid }
+    store.selectedUserList.contains { $0.uid == user.uid }
   }
 
   // MARK: Private
 
   @MainActor
   private var showSelectedUser: Bool {
-    !selectedUserList.isEmpty
+    !store.selectedUserList.isEmpty
   }
 
+  @MainActor
   private var disableNextButton: Bool {
-    selectedUserList.isEmpty || groupName.isEmpty
+    store.selectedUserList.isEmpty || store.groupName.isEmpty
+  }
+
+  @MainActor
+  private var isLoading: Bool {
+    store.fetchUserList.isLoading
   }
 }
 
@@ -45,7 +50,7 @@ extension NewGroupPage: View {
   var body: some View {
     ScrollView {
       LazyVStack(spacing: 32) {
-        TextField("그룹 이름", text: $groupName)
+        TextField("그룹 이름", text: $store.groupName)
           .padding(.leading)
           .frame(maxWidth: .infinity)
           .frame(height: 60)
@@ -68,7 +73,7 @@ extension NewGroupPage: View {
 
             ScrollView(.horizontal) {
               HStack(spacing: 12) {
-                ForEach(selectedUserList, id: \.uid) { item in
+                ForEach(store.selectedUserList, id: \.uid) { item in
                   VStack {
                     Circle()
                       .fill(.gray)
@@ -122,6 +127,13 @@ extension NewGroupPage: View {
                   .imageScale(.large)
               }
             }
+            .onAppear {
+              guard let last = store.userList.last, last.uid == user.uid else { return }
+              guard !store.fetchUserList.isLoading else { return }
+              guard store.lastUser?.uid != last.uid else { return }
+              store.lastUser = last
+              store.send(.getUserList(10, store.userList.last))
+            }
         }
       }
       .padding(.top, 32)
@@ -132,8 +144,9 @@ extension NewGroupPage: View {
       titleView()
       trailingItem()
     }
+    .setRequestFlightView(isLoading: isLoading)
     .onAppear {
-      store.send(.getUserList)
+      store.send(.getUserList(10, store.userList.last))
     }
   }
 }
@@ -149,13 +162,14 @@ extension NewGroupPage {
   }
 
   @ToolbarContentBuilder
+  @MainActor
   private func titleView() -> some ToolbarContent {
     ToolbarItem(placement: .principal) {
       VStack {
         Text("Add Users")
           .bold()
 
-        Text("\(selectedUserList.count)/\(12)")
+        Text("\(store.selectedUserList.count)/\(12)")
           .foregroundStyle(.gray)
           .font(.footnote)
       }
@@ -163,6 +177,7 @@ extension NewGroupPage {
   }
 
   @ToolbarContentBuilder
+  @MainActor
   private func trailingItem() -> some ToolbarContent {
     ToolbarItem(placement: .topBarTrailing) {
       Button(action: { }) {

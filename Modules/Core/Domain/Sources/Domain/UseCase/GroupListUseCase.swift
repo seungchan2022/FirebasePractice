@@ -5,6 +5,5 @@ public protocol GroupListUseCase: Sendable {
 
   var getGroupList: () async throws -> [GroupListEntity.Group.Item] { get }
 
-  var getUserList: () async throws -> [UserEntity.User.Response] { get }
-
+  var getUserList: (Int, UserEntity.User.Response?) async throws -> [UserEntity.User.Response] { get }
 }

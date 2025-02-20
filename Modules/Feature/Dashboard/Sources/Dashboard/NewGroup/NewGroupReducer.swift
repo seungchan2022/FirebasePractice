@@ -20,10 +20,10 @@ struct NewGroupReducer {
         return .concatenate(
           CancelID.allCases.map { .cancel(pageID: state.id, id: $0) })
 
-      case .getUserList:
+      case .getUserList(let limit, let item):
         state.fetchUserList.isLoading = true
         return sideEffect
-          .getUserList()
+          .getUserList(limit, item)
           .cancellable(pageID: state.id, id: CancelID.requestUserList, cancelInFlight: true)
 
       case .fetchUserList(let result):
@@ -31,7 +31,7 @@ struct NewGroupReducer {
         switch result {
         case .success(let itemList):
           state.fetchUserList.value = itemList
-          state.userList = itemList
+          state.userList = state.userList.merge(itemList)
           return .none
 
         case .failure(let error):
@@ -59,6 +59,10 @@ extension NewGroupReducer {
       self.id = id
     }
 
+    var groupName = ""
+    var selectedUserList: [UserEntity.User.Response] = []
+
+    var lastUser: UserEntity.User.Response? = .none
     var userList: [UserEntity.User.Response] = []
 
     var fetchUserList: FetchState.Data<[UserEntity.User.Response]?> = .init(isLoading: false, value: .none)
@@ -68,7 +72,7 @@ extension NewGroupReducer {
     case binding(BindingAction<State>)
     case teardown
 
-    case getUserList
+    case getUserList(Int, UserEntity.User.Response?)
     case fetchUserList(Result<[UserEntity.User.Response], CompositeErrorRepository>)
 
     case routeToClose
@@ -83,5 +87,16 @@ extension NewGroupReducer {
   enum CancelID: Equatable, CaseIterable {
     case teardown
     case requestUserList
+  }
+}
+
+extension [UserEntity.User.Response] {
+  fileprivate func merge(_ target: Self) -> Self {
+    let new = target.reduce(self) { curr, next in
+      guard !self.contains(where: { $0.uid == next.uid }) else { return curr }
+      return curr + [next]
+    }
+
+    return new
   }
 }

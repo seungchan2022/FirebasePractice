@@ -71,33 +71,23 @@ extension GroupListUseCasePlatform: GroupListUseCase {
 
         return groupList
       } catch {
-        // 에러가 발생했을 경우 처리
         throw CompositeErrorRepository.other(error)
       }
     }
   }
 
-  public var getUserList: () async throws -> [UserEntity.User.Response] {
-    {
+  public var getUserList: (Int, UserEntity.User.Response?) async throws -> [UserEntity.User.Response] {
+    { limit, item in
       do {
         guard let me = Auth.auth().currentUser else {
           throw CompositeErrorRepository.incorrectUser
         }
 
-        // Firestore에서 모든 유저 문서 가져오기
-        let snapshot = try await Firestore.firestore().collection("users").getDocuments()
+        // 현재 로그인한 유저 제외
+        let itemList = try await getAllUser(limit: limit, lastItem: item).filter { $0.uid != me.uid }
 
-        // 문서들을 Authentication.Me.Response로 변환
-        let itemList: [UserEntity.User.Response] = snapshot.documents.compactMap { document in
-          try? document.data(as: UserEntity.User.Response.self)
-        }
-
-        // 현재 로그인한 유저는 제외
-        let filteredItemList = itemList.filter { $0.uid != me.uid }
-
-        return filteredItemList
+        return itemList
       } catch {
-        // 에러 발생 시 처리
         throw CompositeErrorRepository.other(error)
       }
     }
@@ -106,6 +96,9 @@ extension GroupListUseCasePlatform: GroupListUseCase {
 }
 
 extension GroupListUseCasePlatform {
+
+  // MARK: Internal
+
   func addGroupId(groupId: String) async throws {
     guard let me = Auth.auth().currentUser else { return }
 
@@ -138,4 +131,22 @@ extension GroupListUseCasePlatform {
       .document(item.id)
       .setData(from: item.self, merge: true)
   }
+
+  // MARK: Private
+
+  private func getAllUser(limit: Int, lastItem: UserEntity.User.Response?) async throws -> [UserEntity.User.Response] {
+    let query = Firestore.firestore()
+      .collection("users")
+      .order(by: "created")
+      .limit(to: limit)
+
+    if let lastItem {
+      return try await query
+        .start(after: [lastItem.created ?? .now])
+        .getDocuments(as: UserEntity.User.Response.self)
+    } else {
+      return try await query.getDocuments(as: UserEntity.User.Response.self)
+    }
+  }
+
 }
