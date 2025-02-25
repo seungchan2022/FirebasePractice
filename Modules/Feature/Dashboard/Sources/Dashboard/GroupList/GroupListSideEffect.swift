@@ -38,6 +38,16 @@ extension GroupListSideEffect {
     }
   }
 
+  var routeToGroupDetail: (GroupListEntity.Group.Item) -> Void {
+    { item in
+      navigator.next(
+        linkItem: .init(
+          path: Link.Dashboard.Path.groupListDetail.rawValue,
+          items: item),
+        isAnimated: true)
+    }
+  }
+
   var routeToNewGroup: () -> Void {
     {
       navigator.fullSheet(

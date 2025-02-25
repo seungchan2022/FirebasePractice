@@ -20,5 +20,7 @@ extension Link.Dashboard {
     case todo
     case groupList
     case newGroup
+    case groupListDetail
+    case selectCategory
   }
 }

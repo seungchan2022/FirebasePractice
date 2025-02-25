@@ -57,6 +57,10 @@ struct GroupListReducer {
           return .run { await $0(.throwError(error)) }
         }
 
+      case .onTapGroupItem(let item):
+        sideEffect.routeToGroupDetail(item)
+        return .none
+
       case .routeToNewGroup:
         sideEffect.routeToNewGroup()
         return .none
@@ -96,6 +100,8 @@ extension GroupListReducer {
 
     case getGroupList
     case fetchGroupList(Result<[GroupListEntity.Group.Item], CompositeErrorRepository>)
+
+    case onTapGroupItem(GroupListEntity.Group.Item)
 
     case routeToNewGroup
 

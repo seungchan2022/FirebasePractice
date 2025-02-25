@@ -8,6 +8,8 @@ import SwiftUI
 struct NewGroupPage {
   @Bindable var store: StoreOf<NewGroupReducer>
 
+  @State private var showAlert = false
+
 }
 
 extension NewGroupPage {
@@ -16,6 +18,12 @@ extension NewGroupPage {
 
   @MainActor
   func handleUserSelection(_ user: UserEntity.User.Response) {
+    // 12명 이상 선택되었는지 확인
+    guard store.selectedUserList.count < 12 else {
+      showAlert = true
+      return
+    }
+
     store.selectedUserList = isUserSelected(user)
       ? store.selectedUserList.filter { $0.uid != user.uid } // 이미 선택된 경우 삭제
       : store.selectedUserList + [user] // 선택되지 않은 경우 추가
@@ -147,6 +155,14 @@ extension NewGroupPage: View {
     .setRequestFlightView(isLoading: isLoading)
     .onAppear {
       store.send(.getUserList(10, store.userList.last))
+    }
+    .alert(
+      "최대 12명까지만 선택할 수 있습니다",
+      isPresented: $showAlert)
+    {
+      Button(role: .cancel ,action: { showAlert = false }) {
+        Text("확인")
+      }
     }
   }
 }

@@ -93,6 +93,7 @@ extension GroupListUseCasePlatform: GroupListUseCase {
     }
   }
 
+  /// 새로운 그룹 생성 및 멤버 추가
   public var createNewGroup: (String, [UserEntity.User.Response]) async throws -> Bool {
     { groupName, memberList in
       guard let me = Auth.auth().currentUser else { throw CompositeErrorRepository.incorrectUser }
@@ -118,6 +119,78 @@ extension GroupListUseCasePlatform: GroupListUseCase {
     }
   }
 
+  /// 카테고리를 추가하기 위해 현재 로그인된 유저의 모든 카테고리 불러오기
+  public var getCategoryItemList: (String) async throws -> [TodoListEntity.Category.Item] {
+    { uid in
+      do {
+        return try await Firestore.firestore()
+          .collection("users")
+          .document(uid)
+          .collection("category_list")
+          .order(by: "date_created", descending: false)
+          .getDocuments(as: TodoListEntity.Category.Item.self)
+
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  /// 그룹에 카테고리 여러 개 추가
+  public var addCategoryItemList: (String, [String]) async throws -> Bool {
+    { groupId, categoryIdList in
+      let data: [String: Any] = [
+        "category_list": FieldValue.arrayUnion(categoryIdList),
+      ]
+      do {
+        try await Firestore.firestore()
+          .collection("groups")
+          .document(groupId)
+          .updateData(data)
+
+        return true
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
+
+  /// 공유된 카테고리의 투두 가져오기
+  public var getTodoItemList: (String) async throws -> [String: [TodoListEntity.TodoItem.Item]] {
+    { groupId in
+
+      let groupDoc = try await Firestore.firestore()
+        .collection("groups")
+        .document(groupId)
+        .getDocument()
+
+      // 그룹에서 공유된 카테고리 목록 가져오기
+      guard let categoryIds = groupDoc.data()?["category_list"] as? [String], !categoryIds.isEmpty else {
+        return [:] // 카테고리가 없으면 빈 딕셔너리 반환
+      }
+
+      // Firestore에서 모든 유저의 해당 카테고리에 있는 todo 가져오기
+      let snapshot = try await Firestore.firestore()
+        .collectionGroup("todo_list")
+        .whereField("category_id", in: categoryIds)
+        .getDocuments()
+
+      do {
+        // 데이터를 카테고리별로 그룹화
+        let todosByCategory = try snapshot.documents.reduce(into: [String: [TodoListEntity.TodoItem.Item]]()) { result, doc in
+          let todoItem = try doc.data(as: TodoListEntity.TodoItem.Item.self)
+          let categoryId = todoItem.categoryId
+
+          // 카테고리별로 데이터를 덧셈 연산자 사용하여 처리
+          result[categoryId] = (result[categoryId] ?? []) + [todoItem]
+        }
+
+        return todosByCategory
+      } catch {
+        throw CompositeErrorRepository.other(error)
+      }
+    }
+  }
 }
 
 extension GroupListUseCasePlatform {

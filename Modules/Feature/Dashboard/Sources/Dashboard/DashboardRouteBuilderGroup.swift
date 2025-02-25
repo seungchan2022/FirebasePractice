@@ -21,6 +21,8 @@ extension DashboardRouteBuilderGroup {
       TodoRouteBuilder.generate(),
       GroupListRouteBuilder.generate(),
       NewGroupRouteBuilder.generate(),
+      GroupListDetailRouteBuilder.generate(),
+      SelectCategoryRouteBuilder.generate(),
     ]
   }
 }

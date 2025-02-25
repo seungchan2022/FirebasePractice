@@ -25,10 +25,12 @@ extension GroupListPage: View {
     ScrollView {
       LazyVStack {
         ForEach(itemList, id: \.id) { item in
-          Text(item.id)
-          Text(item.name)
+          ItemComponent(
+            viewState: .init(item: item),
+            tapAction: { store.send(.onTapGroupItem($0)) })
         }
       }
+      .padding(.top, 32)
     }
     .toolbar {
       ToolbarItem(placement: .topBarTrailing) {
